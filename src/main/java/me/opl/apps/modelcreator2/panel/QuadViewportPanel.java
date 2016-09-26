@@ -8,26 +8,25 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
-import me.opl.apps.modelcreator2.ModelWindow;
-import me.opl.apps.modelcreator2.panel.modelview.ModelViewComponent;
-import me.opl.apps.modelcreator2.panel.modelview.ModelViewComponent.CameraMode;
-import me.opl.apps.modelcreator2.panel.modelview.ModelViewComponent.RenderMode;
+import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4.CameraMode;
+import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4.RenderMode;
+import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4;
 import me.opl.libs.tablib.AbstractPanel;
 import me.opl.libs.tablib.VariableProvider;
 
-public class QuadModelViewPanel extends AbstractPanel {
+public class QuadViewportPanel extends AbstractPanel {
 	private JPanel panel;
 
-	private ModelViewComponent[] mvcs;
+	private ViewportComponentGL4[] mvcs;
 
-	public QuadModelViewPanel(VariableProvider vp) {
+	public QuadViewportPanel(VariableProvider vp) {
 		super(vp);
 
-		mvcs = new ModelViewComponent[] {
-			new ModelViewComponent(vp, CameraMode.ORTHO_WEST, RenderMode.MODEL),
-			new ModelViewComponent(vp, CameraMode.ORTHO_UP, RenderMode.MODEL),
-			new ModelViewComponent(vp, CameraMode.ORTHO_SOUTH, RenderMode.MODEL),
-			new ModelViewComponent(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED)
+		mvcs = new ViewportComponentGL4[] {
+			new ViewportComponentGL4(vp, CameraMode.ORTHO_WEST, RenderMode.MODEL),
+			new ViewportComponentGL4(vp, CameraMode.ORTHO_UP, RenderMode.MODEL),
+			new ViewportComponentGL4(vp, CameraMode.ORTHO_SOUTH, RenderMode.MODEL),
+			new ViewportComponentGL4(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED)
 		};
 
 		final JSplitPane topPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, mvcs[0], mvcs[1]);
@@ -71,6 +70,6 @@ public class QuadModelViewPanel extends AbstractPanel {
 
 	@Override
 	public String getTitle() {
-		return "Quad Model View";
+		return "Quad Viewport";
 	}
 }

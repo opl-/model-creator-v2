@@ -1,16 +1,21 @@
 package me.opl.apps.modelcreator2;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
 import javax.swing.JFrame;
 
+import org.json.JSONObject;
+
 import me.opl.apps.modelcreator2.event.EventDispatcher;
+import me.opl.apps.modelcreator2.event.WindowClosedEvent;
+import me.opl.apps.modelcreator2.event.WindowClosingEvent;
 import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.libs.tablib.TabLib;
 import me.opl.libs.tablib.Template;
 import me.opl.libs.tablib.Window;
 
-import org.json.JSONObject;
-
-public class ModelWindow {
+public class ModelWindow implements WindowListener {
 	public static final String VP_MODEL_WINDOW = "me.opl.apps.modelcreator2.ModelWindow.VP_MODEL_WINDOW";
 
 	private TabLib tabLib;
@@ -44,13 +49,25 @@ public class ModelWindow {
 		// TODO: get the window from settings/file/disk/whatever
 
 		// TODO: add default templates
-		Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadModelViewPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelViewPanel\"}],\"type\":\"tpc\"}}"));
+		//Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadModelViewPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelViewPanel\"}],\"type\":\"tpc\"}}"));
+		Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadViewportPanel\"}],\"type\":\"tpc\"}}"));
 
 		window = tabLib.openNewWindow(template);
 
 		window.setTitle("opl's Model Creator");
 
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // TODO: kill when last window closes
+		window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		window.addWindowListener(this);
+	}
+
+	public void closeWindow() {
+		// TODO: add close confirmations, state saving, etc
+
+		WindowClosedEvent event = new WindowClosedEvent(this);
+		getEventBus().fire(event);
+
+		window.setVisible(false);
+		window.dispose();
 	}
 
 	public void setModel(BaseModel model) {
@@ -65,4 +82,20 @@ public class ModelWindow {
 	public EventDispatcher getEventBus() {
 		return eventBus;
 	}
+
+	@Override
+	public void windowClosing(WindowEvent event) {
+		WindowClosingEvent closeEvent = new WindowClosingEvent(this);
+
+		getEventBus().fire(closeEvent);
+
+		if (!closeEvent.isCancelled()) closeWindow();
+	}
+
+	@Override public void windowActivated(WindowEvent event) {}
+	@Override public void windowClosed(WindowEvent event) {}
+	@Override public void windowDeactivated(WindowEvent event) {}
+	@Override public void windowDeiconified(WindowEvent event) {}
+	@Override public void windowIconified(WindowEvent event) {}
+	@Override public void windowOpened(WindowEvent event) {}
 }

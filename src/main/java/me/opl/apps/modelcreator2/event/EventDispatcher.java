@@ -78,6 +78,7 @@ public class EventDispatcher {
 					toRemove.add(rl);
 					continue;
 				}
+
 				if (rl.eventType == eventType || (rl.method.getAnnotation(EventHandler.class).deep() && rl.eventType.isAssignableFrom(eventType))) {
 					try {
 						rl.method.invoke(rl.listener.get(), event);
@@ -86,6 +87,7 @@ public class EventDispatcher {
 					}
 				}
 			}
+
 			for (RegisteredListener rl : toRemove) e.getValue().remove(rl);
 			toRemove.clear();
 		}
@@ -97,12 +99,13 @@ public class EventDispatcher {
 		private Class<? extends Event> eventType;
 
 		public RegisteredListener(EventListener listener, Method method) {
-			this.listener = new WeakReference<EventListener>(listener);
-			this.method = method;
-
 			Class<?>[] params = method.getParameterTypes();
 			if (params.length != 1 || !Event.class.isAssignableFrom(params[0])) throw new IllegalArgumentException("method doesn't accept one parameter of type Event");
+
 			eventType = params[0].asSubclass(Event.class);
+
+			this.listener = new WeakReference<EventListener>(listener);
+			this.method = method;
 		}
 	}
 }

@@ -5,30 +5,33 @@ import java.util.ArrayList;
 public class BaseModel {
 	protected BaseModel parentModel;
 
-	protected ArrayList<Voxel> elements;
-
-	protected ArrayList<Selectable> selectable;
+	private ArrayList<Element> elements;
+	private ArrayList<Texture> textures;
 
 	protected BaseModel(BaseModel parentModel) {
 		this.parentModel = parentModel;
+
+		elements = new ArrayList<Element>();
 	}
 
 	/**
-	 * Get element at given index. If the index is bigger than the amount of
-	 * elements in this model and the parent model exists, then the amount of
-	 * elements in this model is subtracted from index and passed to the parent
-	 * model.
+	 * Get parent model.
+	 *
+	 * @return Parent model if it exists, null otherwise 
+	 */
+	public BaseModel getParent() {
+		return parentModel;
+	}
+
+	/**
+	 * Get element at given index.
 	 *
 	 * @param index Index of the desired element
 	 * @throws ArrayIndexOutOfBoundsException If the index is bigger than the
-	 * amount of elements in this model and it's parent models
-	 * @return Desired element
+	 * amount of elements in this model
+	 * @return Element at given index
 	 */
-	public Voxel getElementAtIndex(int index) throws ArrayIndexOutOfBoundsException {
-		if (index >= elements.size()) {
-			if (parentModel != null) throw new ArrayIndexOutOfBoundsException(index);
-			else return parentModel.getElementAtIndex(index);
-		}
+	public Element getElementAtIndex(int index) throws ArrayIndexOutOfBoundsException {
 		return elements.get(index);
 	}
 
@@ -40,64 +43,92 @@ public class BaseModel {
 	 * amount of elements in this model
 	 * @return Desired element
 	 */
-	public Voxel getModelElementAtIndex(int index) throws ArrayIndexOutOfBoundsException {
+	public Element getModelElementAtIndex(int index) throws ArrayIndexOutOfBoundsException {
 		return elements.get(index);
 	}
 
 	/**
-	 * Get elements in this model and all elements in it's parent models.
+	 * Get elements in this model or one of the parent elements if this model
+	 * doesn't have any elements.
 	 *
-	 * @return Array of elements in this model and it's parents
+	 * @return Array of elements in this or one of the parent models
 	 */
-	public Voxel[] getElements() {
-		Voxel[] elementsArray = new Voxel[elements.size()];
-		elements.toArray(elementsArray);
-		return elementsArray;
+	public Element[] getElements() {
+		if (elements == null) {
+			if (getParent() == null) return null;
+			else return getParent().getElements(); 
+		}
+
+		return getModelElements();
 	}
 
 	/**
-	 * Get elements in this model, without the elements in it's parent models.
+	 * Get elements in this model.
 	 *
 	 * @return Array of elements in this model
 	 */
-	public Voxel[] getModelElements() {
-		Voxel[] elementsArray = new Voxel[elements.size()];
+	public Element[] getModelElements() {
+		Element[] elementsArray = new Element[elements.size()];
 		elements.toArray(elementsArray);
 		return elementsArray;
 	}
 
 	/**
-	 * Get number of elements in this model and all it's parent models.
+	 * Add an element to this model.
 	 *
-	 * @return Number of all elements
+	 * @param element Element to add
 	 */
-	public int getElementCount() {
-		int elementCount = elements.size();
-		BaseModel model = parentModel;
-
-		while (model != null) {
-			elementCount += model.getModelElementCount();
-			model = model.getParent();
-		}
-
-		return elementCount;
+	public void addElement(Element element) {
+		elements.add(element);
 	}
 
 	/**
-	 * Get number of elements in this model, without the parent models.
+	 * Get the number of elements in this model.
 	 *
 	 * @return Number of elements in this model
 	 */
-	public int getModelElementCount() {
+	public int getElementCount() {
 		return elements.size();
 	}
 
 	/**
-	 * Get parent model.
+	 * Get texture by name.
 	 *
-	 * @return Parent model if it exists, null otherwise 
+	 * @param textureName The name of the desired texture.
+	 * @return Texture with the given name
 	 */
-	public BaseModel getParent() {
-		return parentModel;
+	public Texture getModelTextureByName(String textureName) {
+		for (Texture t : textures) if (t.getName().equals(textureName)) return t;
+
+		return null;
+	}
+
+	/**
+	 * Get textures in this model.
+	 *
+	 * @return Array of textures in this model
+	 */
+	public Texture[] getTextures() {
+		Texture[] texturesArray = new Texture[textures.size()];
+		textures.toArray(texturesArray);
+		return texturesArray;
+	}
+
+	/**
+	 * Get number of textures in this and the parent model.
+	 *
+	 * @return Number of textures in this and the parent model
+	 */
+	public int getTextureCount() {
+		return textures.size() + parentModel.getTextureCount();
+	}
+
+	/**
+	 * Get number of textures in this model.
+	 *
+	 * @return Number of textures in this model
+	 */
+	public int getModelTextureCount() {
+		return textures.size();
 	}
 }

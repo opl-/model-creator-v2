@@ -22,7 +22,7 @@ public class ToolManager {
 	}
 
 	static {
-		// TODO: move elsewhere?
+		// TODO: move to core plugin?
 		registerTool(MoveTool.class);
 		registerTool(RotateTool.class);
 	}

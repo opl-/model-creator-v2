@@ -1,41 +1,41 @@
 package me.opl.apps.modelcreator2.model;
 
 public class Position implements Cloneable {
-	private double x;
-	private double y;
-	private double z;
+	private float x;
+	private float y;
+	private float z;
 
-	public Position(double x, double y, double z) {
+	public Position(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 
-	public double getX() {
+	public float getX() {
 		return x;
 	}
 
-	public void setX(double x) {
+	public void setX(float x) {
 		this.x = x;
 	}
 
-	public double getY() {
+	public float getY() {
 		return y;
 	}
 
-	public void setY(double y) {
+	public void setY(float y) {
 		this.y = y;
 	}
 
-	public double getZ() {
+	public float getZ() {
 		return z;
 	}
 
-	public void setZ(double z) {
+	public void setZ(float z) {
 		this.z = z;
 	}
 
-	public Position set(double x, double y, double z) {
+	public Position set(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -80,7 +80,7 @@ public class Position implements Cloneable {
 	 * @param z Z position to add
 	 * @return This position object
 	 */
-	public Position add(double x, double y, double z) {
+	public Position add(float x, float y, float z) {
 		this.x += x;
 		this.y += y;
 		this.z += z;
@@ -108,7 +108,7 @@ public class Position implements Cloneable {
 	 * @param z Z position to subtract
 	 * @return This position object
 	 */
-	public Position subtract(double x, double y, double z) {
+	public Position subtract(float x, float y, float z) {
 		this.x -= x;
 		this.y -= y;
 		this.z -= z;
@@ -136,7 +136,7 @@ public class Position implements Cloneable {
 	 * @param z Z position to multiply by
 	 * @return This position object
 	 */
-	public Position multiply(double x, double y, double z) {
+	public Position multiply(float x, float y, float z) {
 		this.x *= x;
 		this.y *= y;
 		this.z *= z;
@@ -149,7 +149,7 @@ public class Position implements Cloneable {
 	 * @param scale Value to multiply by
 	 * @return This position object
 	 */
-	public Position multiply(double scale) {
+	public Position multiply(float scale) {
 		this.x *= scale;
 		this.y *= scale;
 		this.z *= scale;
@@ -174,7 +174,7 @@ public class Position implements Cloneable {
 	 * @param z Z position to cross this object with
 	 * @return New position object
 	 */
-	public Position cross(double x, double y, double z) {
+	public Position cross(float x, float y, float z) {
 		return new Position(this.y * z - this.z * y, this.z * x - this.x * z, this.x * y - this.y * x);
 	}
 
@@ -184,12 +184,12 @@ public class Position implements Cloneable {
 	 * @param pos Position object to calculate the distance from
 	 * @return Distance from the given position object
 	 */
-	public double distance(Position pos) {
-		double dx = x - pos.x;
-		double dy = y - pos.y;
-		double dz = z - pos.z;
+	public float distance(Position pos) {
+		float dx = x - pos.x;
+		float dy = y - pos.y;
+		float dz = z - pos.z;
 
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	/**
@@ -200,24 +200,24 @@ public class Position implements Cloneable {
 	 * @param z Z to calculate distance from
 	 * @return Distance from the given position
 	 */
-	public double distance(double x, double y, double z) {
-		double dx = this.x - x;
-		double dy = this.y - y;
-		double dz = this.z - z;
+	public float distance(float x, float y, float z) {
+		float dx = this.x - x;
+		float dy = this.y - y;
+		float dz = this.z - z;
 
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
-	public double dot(Position pos) {
+	public float dot(Position pos) {
 		return x * pos.x + y * pos.y + z * pos.z;
 	}
 
-	public double dot(double x, double y, double z) {
+	public float dot(float x, float y, float z) {
 		return this.x * x + this.y * y + this.z * z;
 	}
 
 	public Position normalize() {
-		double l = distance(0d, 0d, 0d);
+		float l = distance(0f, 0f, 0f);
 		x /= l;
 		y /= l;
 		z /= l;
@@ -225,15 +225,15 @@ public class Position implements Cloneable {
 	}
 
 	public Position normalize(Position origin) {
-		double l = distance(origin);
+		float l = distance(origin);
 		x /= l;
 		y /= l;
 		z /= l;
 		return this;
 	}
 
-	public Position normalize(double x, double y, double z) {
-		double l = distance(x, y, z);
+	public Position normalize(float x, float y, float z) {
+		float l = distance(x, y, z);
 		this.x /= l;
 		this.y /= l;
 		this.z /= l;
@@ -246,12 +246,12 @@ public class Position implements Cloneable {
 	 *
 	 * @return Array containing this objects position values
 	 */
-	public double[] toArray() {
-		return new double[] {x, y, z};
+	public float[] toArray() {
+		return new float[] {x, y, z};
 	}
 
 	@Override
 	public String toString() {
-		return "[" + x + "," + y + "," + z + "]";
+		return "Position[" + x + "," + y + "," + z + "]";
 	}
 }

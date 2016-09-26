@@ -1,9 +1,14 @@
-package me.opl.apps.modelcreator2.panel.modelview;
+package me.opl.apps.modelcreator2.viewport;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLJPanel;
@@ -11,15 +16,16 @@ import javax.media.opengl.glu.GLU;
 
 import me.opl.apps.modelcreator2.ModelWindow;
 import me.opl.apps.modelcreator2.model.Position;
+import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.util.IntersectionHelper;
 import me.opl.libs.tablib.VariableProvider;
 
-public class ModelViewComponent extends GLJPanel implements GLEventListener {
+public class ViewportComponentGL2 extends GLJPanel implements GLEventListener {
 	private static final long serialVersionUID = -8904162480695586692L;
 
 	private GLU glu;
 
-	private ModelViewController controller;
+	private ViewportController controller;
 
 	private CameraMode cameraMode;
 	private RenderMode renderMode;
@@ -27,30 +33,30 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 	private Position cameraTarget;
 	private Position cameraPosition;
 
-	private double fov = 45d;
+	private float fov = 45f;
 
-	private double[] matrixBuffer;
+	private float[] matrixBuffer;
 	private int[] viewportBuffer;
 
-	public ModelViewComponent(VariableProvider vp) {
+	public ViewportComponentGL2(VariableProvider vp) {
 		this(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED);
 	}
 
-	public ModelViewComponent(VariableProvider vp, CameraMode cameraMode, RenderMode renderMode) {
+	public ViewportComponentGL2(VariableProvider vp, CameraMode cameraMode, RenderMode renderMode) {
 		addGLEventListener(this);
 
 		this.cameraMode = cameraMode;
 		this.renderMode = renderMode;
 
-		cameraTarget = new Position(8d, 8d, 8d);
-		cameraPosition = new Position(100d, 80d, -42d).subtract(cameraTarget).normalize().multiply(100d).add(cameraTarget);
+		cameraTarget = new Position(8f, 8f, 8f);
+		cameraPosition = new Position(100f, 80f, -42f).subtract(cameraTarget).normalize().multiply(100f).add(cameraTarget);
 
-		matrixBuffer = new double[32];
+		matrixBuffer = new float[32];
 		viewportBuffer = new int[4];
 
 		glu = new GLU();
 
-		controller = new ModelViewController((ModelWindow) vp.getObject(ModelWindow.VP_MODEL_WINDOW), this, glu);
+		//controller = new ModelViewController((ModelWindow) vp.getObject(ModelWindow.VP_MODEL_WINDOW), this, glu);
 		addMouseListener(controller);
 		addMouseMotionListener(controller);
 		addMouseWheelListener(controller);
@@ -90,12 +96,12 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 		gl.glLoadIdentity();
 
 		if (cameraMode.getView() == CameraMode.View.PERSPECTIVE) {
-			glu.gluPerspective(fov, (double) getWidth() / (double) getHeight(), 1, 1000);
+			glu.gluPerspective(fov, (float) getWidth() / (float) getHeight(), 1, 1000);
 		} else if (cameraMode.getView() == CameraMode.View.ORTHO) {
-			double ar = (double) getWidth() / (double) getHeight();
-			double w = fov * ar;
-			double h = w / ar;
-		    gl.glOrtho(-w, w, -h, h, cameraMode.hasDirection() ? -1000d : 1d, 1000d);
+			float ar = (float) getWidth() / (float) getHeight();
+			float w = fov * ar;
+			float h = w / ar;
+		    gl.glOrtho(-w, w, -h, h, cameraMode.hasDirection() ? -1000f : 1f, 1000f);
 		}
 
 		if (cameraMode.getDirection() != null) {
@@ -109,13 +115,14 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 		gl.glLoadIdentity();
 
 		// Getting matrix values for click detection
-		gl.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, matrixBuffer, 0);
-		gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, matrixBuffer, 16);
+		gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, matrixBuffer, 0);
+		gl.glGetFloatv(GL2.GL_PROJECTION_MATRIX, matrixBuffer, 16);
 		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewportBuffer, 0);
+		System.out.println(GLHelper.arrayToString(viewportBuffer));
 
 		// 16x16x16 model outline
 		gl.glLineWidth(1f);
-		gl.glColor4d(1d, 1d, 1d, 0.2d);
+		gl.glColor4f(1f, 1f, 1f, 0.2f);
 		gl.glEnable(GL2.GL_BLEND);
 
 		gl.glBegin(GL2.GL_LINES); gl.glVertex3d( 0d,  0d,  0d); gl.glVertex3d(16d,  0d,  0d); gl.glEnd();
@@ -251,17 +258,17 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBegin(GL2.GL_LINES);
 		gl.glColor4d(hits?0:1, hits?1:0, 0, .3d);
-		gl.glVertex3dv(rayStart.toArray(), 0);
+		gl.glVertex3fv(rayStart.toArray(), 0);
 		gl.glColor4d(1, 1, 0, 0);
-		gl.glVertex3dv(rayPoint.toArray(), 0);
+		gl.glVertex3fv(rayPoint.toArray(), 0);
 		gl.glEnd();
 		gl.glColor4d(1d, hits? 0d : 1d, 1d, 1d);
 		gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 		gl.glBegin(GL2.GL_QUADS);
-		gl.glVertex3dv(new Position(0,16,0).toArray(), 0);
-		gl.glVertex3dv(new Position(16,16,0).toArray(), 0);
-		gl.glVertex3dv(new Position(16,16,16).toArray(), 0);
-		gl.glVertex3dv(new Position(0,16,0).clone().add(new Position(16,16,16)).subtract(new Position(16,16,0)).toArray(), 0);
+		gl.glVertex3fv(new Position(0,16,0).toArray(), 0);
+		gl.glVertex3fv(new Position(16,16,0).toArray(), 0);
+		gl.glVertex3fv(new Position(16,16,16).toArray(), 0);
+		gl.glVertex3fv(new Position(0,16,0).clone().add(new Position(16,16,16)).subtract(new Position(16,16,0)).toArray(), 0);
 		gl.glEnd();
 		gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 		gl.glDisable(GL2.GL_BLEND);
@@ -325,7 +332,7 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 		return cameraMode.hasDirection() ? cameraMode.getDirection() : cameraTarget.clone().subtract(cameraPosition).normalize();
 	}
 
-	public double[] getMatrixData() {
+	public float[] getMatrixData() {
 		return matrixBuffer;
 	}
 
@@ -336,12 +343,12 @@ public class ModelViewComponent extends GLJPanel implements GLEventListener {
 	public static enum CameraMode {
 		PERSPECTIVE_FREE("Perspective Free", View.PERSPECTIVE, null),
 		ORTHO_FREE("Ortho Free", View.ORTHO, null),
-		ORTHO_NORTH("Ortho North", View.ORTHO, new Position(0d, 0d, 1d)),
-		ORTHO_SOUTH("Ortho South", View.ORTHO, new Position(0d, 0d, -1d)),
-		ORTHO_EAST("Ortho East", View.ORTHO, new Position(-1d, 0d, 0d)),
-		ORTHO_WEST("Ortho West", View.ORTHO, new Position(1d, 0d, 0d)),
-		ORTHO_UP("Ortho Up", View.ORTHO, new Position(0d, -1d, -0.0005d).normalize()),
-		ORTHO_DOWN("Ortho Down", View.ORTHO, new Position(0d, 1d, 0.0005d).normalize());
+		ORTHO_NORTH("Ortho North", View.ORTHO, new Position(0f, 0f, 1f)),
+		ORTHO_SOUTH("Ortho South", View.ORTHO, new Position(0f, 0f, -1f)),
+		ORTHO_EAST("Ortho East", View.ORTHO, new Position(-1f, 0f, 0f)),
+		ORTHO_WEST("Ortho West", View.ORTHO, new Position(1f, 0f, 0f)),
+		ORTHO_UP("Ortho Up", View.ORTHO, new Position(0f, -1f, -0.0005f).normalize()),
+		ORTHO_DOWN("Ortho Down", View.ORTHO, new Position(0f, 1f, 0.0005f).normalize());
 
 		public static enum View {
 			PERSPECTIVE,

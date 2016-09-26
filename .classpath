@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
-  <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all-main/2.2.4/jogl-all-main-2.2.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-android-armv6.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-armv6.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-armv6hf.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-macosx-universal.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-solaris-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-solaris-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-windows-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-windows-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt-main/2.2.4/gluegen-rt-main-2.2.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-android-armv6.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-armv6.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-armv6hf.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-macosx-universal.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-solaris-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-solaris-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-windows-amd64.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-windows-i586.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/json/json/20140107/json-20140107.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/github/opl-/tablib/v1.0/tablib-v1.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all-main/2.2.4/jogl-all-main-2.2.4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-android-armv6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-armv6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-armv6hf.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-linux-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-macosx-universal.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-solaris-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-solaris-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-windows-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/jogl/jogl-all/2.2.4/jogl-all-2.2.4-natives-windows-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt-main/2.2.4/gluegen-rt-main-2.2.4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-android-armv6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-armv6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-armv6hf.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-linux-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-macosx-universal.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-solaris-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-solaris-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-windows-amd64.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jogamp/gluegen/gluegen-rt/2.2.4/gluegen-rt-2.2.4-natives-windows-i586.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/json/json/20140107/json-20140107.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/github/opl-/tablib/v1.0/tablib-v1.0.jar"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

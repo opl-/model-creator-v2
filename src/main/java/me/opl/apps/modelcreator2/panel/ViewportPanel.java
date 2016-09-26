@@ -3,18 +3,17 @@ package me.opl.apps.modelcreator2.panel;
 import javax.media.opengl.GL2;
 import javax.swing.JPanel;
 
-import me.opl.apps.modelcreator2.ModelWindow;
-import me.opl.apps.modelcreator2.panel.modelview.ModelViewComponent;
+import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4;
 import me.opl.libs.tablib.AbstractPanel;
 import me.opl.libs.tablib.VariableProvider;
 
-public class ModelViewPanel extends AbstractPanel {
-	private ModelViewComponent mvc;
+public class ViewportPanel extends AbstractPanel {
+	private ViewportComponentGL4 mvc;
 
-	public ModelViewPanel(VariableProvider vp) {
+	public ViewportPanel(VariableProvider vp) {
 		super(vp);
 
-		mvc = new ModelViewComponent(vp);
+		mvc = new ViewportComponentGL4(vp);
 	}
 
 	@Override
@@ -24,7 +23,7 @@ public class ModelViewPanel extends AbstractPanel {
 
 	@Override
 	public String getTitle() {
-		return "Model View";
+		return "Viewport";
 	}
 
 	private void drawCube(GL2 gl, double x1, double y1, double z1, double x2, double y2, double z2) {

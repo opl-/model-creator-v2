@@ -23,11 +23,11 @@ public class IntersectionHelper {
 
 		rayPoint.subtract(rayStart);
 
-		double nDorRayDir = n.dot(rayPoint);
+		float nDorRayDir = n.dot(rayPoint);
 
 		if (Math.abs(nDorRayDir) < 0.0000001d) return null;
 
-		double t = (-n.dot(rayStart.clone().subtract(plane1))) / nDorRayDir;
+		float t = (-n.dot(rayStart.clone().subtract(plane1))) / nDorRayDir;
 		if (t < 0) return null;
 
 		return rayPoint.clone().multiply(t).add(rayStart);
@@ -53,16 +53,16 @@ public class IntersectionHelper {
 
 		rayPoint.subtract(rayStart);
 
-		double nDorRayDir = n.dot(rayPoint);
+		float nDorRayDir = n.dot(rayPoint);
 
 		if (Math.abs(nDorRayDir) < 0.0000001d) return false;
 
-		double t = (-n.dot(rayStart.clone().subtract(quad1))) / nDorRayDir;
+		float t = (-n.dot(rayStart.clone().subtract(quad1))) / nDorRayDir;
 		if (t < 0) return false;
 
 		Position a = rayPoint.clone().multiply(t).add(rayStart).subtract(quad1);
-		double uDot = u.dot(a);
-		double vDot = v.dot(a);
+		float uDot = u.dot(a);
+		float vDot = v.dot(a);
 
 		return uDot >= 0d && uDot <= u.dot(u) && vDot >= 0d && vDot <= v.dot(v);
 	}

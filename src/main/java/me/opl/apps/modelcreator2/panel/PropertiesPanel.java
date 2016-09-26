@@ -10,6 +10,8 @@ public class PropertiesPanel extends AbstractPanel {
 
 	public PropertiesPanel(VariableProvider variableProvider) {
 		super(variableProvider);
+
+		panel = new JPanel();
 	}
 
 	@Override

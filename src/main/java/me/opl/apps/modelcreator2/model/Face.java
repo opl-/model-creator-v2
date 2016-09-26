@@ -8,10 +8,6 @@ public enum Face {
 	UP,
 	DOWN;
 
-	public int id() {
-		return ordinal();
-	}
-
 	@Override
 	public String toString() {
 		return name().toLowerCase();

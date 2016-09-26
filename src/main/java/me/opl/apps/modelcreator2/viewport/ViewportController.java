@@ -1,4 +1,4 @@
-package me.opl.apps.modelcreator2.panel.modelview;
+package me.opl.apps.modelcreator2.viewport;
 
 import java.awt.Font;
 import java.awt.Point;
@@ -17,28 +17,36 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import me.opl.apps.modelcreator2.ModelWindow;
+import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Position;
-import me.opl.apps.modelcreator2.panel.modelview.ModelViewComponent.CameraMode;
 import me.opl.apps.modelcreator2.tool.ToolManager;
 import me.opl.apps.modelcreator2.util.RotationHelper;
+import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4.CameraMode;
 
-public class ModelViewController implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class ViewportController implements MouseListener, MouseMotionListener, MouseWheelListener {
 	private static final Font FONT = new JLabel().getFont();
 	private static final FontRenderContext FONT_RENDER_CONTEXT = new FontRenderContext(FONT.getTransform(), true, true);
 
-	private ModelViewComponent view;
+	private BaseModel model;
 
-	private GLU glu;
+	private ViewportComponentGL4 view;
 
 	private Point lastMousePosition;
 
-	private ToolManager toolManager;
+	private ToolManager toolManager; // XXX: make global or per window (probably global)
 
-	public ModelViewController(ModelWindow mw, ModelViewComponent component, GLU glu) {
+	public ViewportController(ModelWindow mw, ViewportComponentGL4 component, GLU glu) {
 		this.view = component;
-		this.glu = glu;
 
 		toolManager = new ToolManager(mw);
+	}
+
+	public BaseModel getModel() {
+		return model;
+	}
+
+	public void setModel(BaseModel model) {
+		this.model = model;
 	}
 
 	@Override
@@ -65,24 +73,25 @@ public class ModelViewController implements MouseListener, MouseMotionListener, 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if ((e.getModifiersEx() & (MouseEvent.BUTTON3_DOWN_MASK | MouseEvent.SHIFT_DOWN_MASK)) == (MouseEvent.BUTTON3_DOWN_MASK | MouseEvent.SHIFT_DOWN_MASK) || (e.getModifiersEx() & (MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.ALT_DOWN_MASK | MouseEvent.SHIFT_DOWN_MASK)) == (MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.ALT_DOWN_MASK | MouseEvent.SHIFT_DOWN_MASK)) {
-			moveCamera(e.getX() - lastMousePosition.getX(), e.getY() - lastMousePosition.getY());
+			moveCamera((float) (e.getX() - lastMousePosition.getX()), (float) (e.getY() - lastMousePosition.getY()));
 
 			lastMousePosition = new Point(e.getX(), e.getY());
 		} else if (((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0) || (e.getModifiersEx() & (MouseEvent.ALT_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK)) == (MouseEvent.ALT_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK)) {
-			double xChange = (double) (e.getX() - lastMousePosition.getX());
-			double yChange = (e.getY() - lastMousePosition.getY());
+			float xChange = (float) (e.getX() - lastMousePosition.getX());
+			float yChange = (float) (e.getY() - lastMousePosition.getY());
 
 			if (!view.getCameraMode().hasDirection()) {
-				if (xChange != 0) view.getCameraPosition().set(RotationHelper.rotateY(view.getCameraPosition(), xChange * Math.PI / 540d, view.getCameraTarget())); // / 180d / 3d // XXX: rotation sensitivity
+				if (xChange != 0) view.getCameraPosition().set(RotationHelper.rotateY(view.getCameraPosition(), (float) (xChange * Math.PI / 540d), view.getCameraTarget())); // / 180d / 3d // XXX: rotation sensitivity
 				if (yChange != 0) {
 					Position cameraPosRelativeToTarget = view.getCameraPosition().clone().subtract(view.getCameraTarget());
-					double angleToKnownAxis = Math.atan2(-cameraPosRelativeToTarget.getZ(), cameraPosRelativeToTarget.getX());
+					float angleToKnownAxis = (float) (Math.atan2(-cameraPosRelativeToTarget.getZ(), cameraPosRelativeToTarget.getX()));
 					cameraPosRelativeToTarget.set(RotationHelper.rotateY(cameraPosRelativeToTarget, angleToKnownAxis));
 	
-					double rotationFromY = yChange * Math.PI / 540d; // / 180d / 3d // XXX: rotation sensitivity
-					double currentZRotation = Math.atan2(cameraPosRelativeToTarget.getY(), cameraPosRelativeToTarget.getX());
-					if (currentZRotation - rotationFromY < Math.PI / -2d + 0.01d) rotationFromY = Math.PI / 2d - 0.01d + currentZRotation;
-					else if (currentZRotation - rotationFromY > Math.PI / 2d - 0.01d) rotationFromY = Math.PI / -2d + 0.01d + currentZRotation;
+					float rotationFromY = (float) (yChange * Math.PI / 540d); // / 180d / 3d // XXX: rotation sensitivity
+					float currentZRotation = (float) (Math.atan2(cameraPosRelativeToTarget.getY(), cameraPosRelativeToTarget.getX()));
+
+					if (currentZRotation - rotationFromY < Math.PI / -2f + 0.01f) rotationFromY = (float) (Math.PI / 2d - 0.01d + currentZRotation);
+					else if (currentZRotation - rotationFromY > Math.PI / 2f - 0.01f) rotationFromY = (float) (Math.PI / -2d + 0.01d + currentZRotation);
 	
 					cameraPosRelativeToTarget.set(RotationHelper.rotateZ(cameraPosRelativeToTarget, rotationFromY));
 					cameraPosRelativeToTarget.set(RotationHelper.rotateY(cameraPosRelativeToTarget, -angleToKnownAxis));
@@ -98,17 +107,17 @@ public class ModelViewController implements MouseListener, MouseMotionListener, 
 		}
 	}
 
-	private void moveCamera(double xChange, double yChange) {
+	private void moveCamera(float xChange, float yChange) {
 		Position cameraDirection = view.getCameraDirection();
-		double angleToKnownAxis = Math.atan2(cameraDirection.getX(), cameraDirection.getZ());
+		float angleToKnownAxis = (float) (Math.atan2(cameraDirection.getX(), cameraDirection.getZ()));
 		cameraDirection.set(RotationHelper.rotateY(cameraDirection, angleToKnownAxis));
-		cameraDirection.set(RotationHelper.rotateX(cameraDirection, Math.PI / 2d));
+		cameraDirection.set(RotationHelper.rotateX(cameraDirection, (float) (Math.PI / 2d)));
 
 		Position up = RotationHelper.rotateY(cameraDirection, -angleToKnownAxis);
 		Position right = up.cross(view.getCameraDirection());
 
-		up.multiply(yChange / 3d);
-		right.multiply(xChange / 3d);
+		up.multiply(yChange / 3f);
+		right.multiply(xChange / 3f);
 
 		up.add(right);
 
@@ -118,15 +127,27 @@ public class ModelViewController implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		Position cameraDirection = view.getCameraDirection();
-		cameraDirection.multiply(-3d * e.getWheelRotation());
+		/*Position cameraDirection = view.getCameraDirection();
+		cameraDirection.multiply(-3f * e.getWheelRotation());
 
 		if (e.isShiftDown()) {
 			view.getCameraPosition().add(cameraDirection);
 			view.getCameraTarget().add(cameraDirection);
 		} else {
-			if (view.getCameraPosition().distance(view.getCameraTarget()) + 3d * e.getWheelRotation() > 0d) {
+			System.out.println(view.getCameraPosition().distance(view.getCameraTarget()) + ",pos=" + view.getCameraPosition() + ",tar=" + view.getCameraTarget());
+			if (view.getCameraPosition().distance(view.getCameraTarget()) + 3f * e.getWheelRotation() > 0f) {
 				view.getCameraPosition().add(cameraDirection);
+			}
+		}*/
+
+		if (e.isShiftDown()) {
+			Position cameraDirection = view.getCameraDirection().multiply(e.getWheelRotation() > 0 ? -1 : 1);
+
+			view.getCameraPosition().add(cameraDirection);
+			view.getCameraTarget().add(cameraDirection);
+		} else {
+			if (view.getCameraPosition().distance(view.getCameraTarget()) + 3f * e.getWheelRotation() > 0) {
+				view.getCameraPosition().add(view.getCameraPosition().clone().subtract(view.getCameraTarget()).normalize().multiply(3f * e.getWheelRotation()));
 			}
 		}
 	}
