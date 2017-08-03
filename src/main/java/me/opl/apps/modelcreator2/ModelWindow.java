@@ -7,10 +7,8 @@ import javax.swing.JFrame;
 
 import org.json.JSONObject;
 
-import me.opl.apps.modelcreator2.event.EventDispatcher;
 import me.opl.apps.modelcreator2.event.WindowClosedEvent;
 import me.opl.apps.modelcreator2.event.WindowClosingEvent;
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.libs.tablib.TabLib;
 import me.opl.libs.tablib.Template;
 import me.opl.libs.tablib.Window;
@@ -18,22 +16,19 @@ import me.opl.libs.tablib.Window;
 public class ModelWindow implements WindowListener {
 	public static final String VP_MODEL_WINDOW = "me.opl.apps.modelcreator2.ModelWindow.VP_MODEL_WINDOW";
 
+	private ModelCreator modelCreator;
+
 	private TabLib tabLib;
 	private Window window;
-
-	private EventDispatcher eventBus;
-
-	private BaseModel model;
 
 	/**
 	 * A window for model. Each model has it's own window that's used to edit
 	 * it.
 	 */
-	public ModelWindow() {
-		tabLib = new TabLib(new MCVariableProvider(this));
-		tabLib.getVariableProvider().setObject(VP_MODEL_WINDOW, this);
+	public ModelWindow(ModelCreator modelCreator) {
+		this.modelCreator = modelCreator;
 
-		eventBus = new EventDispatcher();
+		tabLib = new TabLib(new MCVariableProvider(modelCreator, this));
 
 		createWindow();
 	}
@@ -44,13 +39,13 @@ public class ModelWindow implements WindowListener {
 	 * @throws IllegalStateException If the window is already initiated
 	 */
 	private void createWindow() throws IllegalStateException {
-		if (window != null) throw new IllegalStateException("Window already initiated.");
+		if (window != null) throw new IllegalStateException("Window already initiated");
 
-		// TODO: get the window from settings/file/disk/whatever
+		// TODO: get the window from settings/resource file/disk/whatever
 
 		// TODO: add default templates
 		//Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadModelViewPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelViewPanel\"}],\"type\":\"tpc\"}}"));
-		Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadViewportPanel\"}],\"type\":\"tpc\"}}"));
+		Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelListPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.SettingsPanel\"}],\"type\":\"tpc\"}}"));
 
 		window = tabLib.openNewWindow(template);
 
@@ -64,30 +59,17 @@ public class ModelWindow implements WindowListener {
 		// TODO: add close confirmations, state saving, etc
 
 		WindowClosedEvent event = new WindowClosedEvent(this);
-		getEventBus().fire(event);
+		modelCreator.getEventDispatcher().fire(event);
 
 		window.setVisible(false);
 		window.dispose();
-	}
-
-	public void setModel(BaseModel model) {
-		// TODO: fire event?
-		this.model = model;
-	}
-
-	public BaseModel getModel() {
-		return model;
-	}
-
-	public EventDispatcher getEventBus() {
-		return eventBus;
 	}
 
 	@Override
 	public void windowClosing(WindowEvent event) {
 		WindowClosingEvent closeEvent = new WindowClosingEvent(this);
 
-		getEventBus().fire(closeEvent);
+		modelCreator.getEventDispatcher().fire(closeEvent);
 
 		if (!closeEvent.isCancelled()) closeWindow();
 	}

@@ -1,13 +1,17 @@
 package me.opl.apps.modelcreator2.viewport.renderer;
 
-import javax.media.opengl.GL4;
+import com.jogamp.opengl.GL3;
 
 public interface Renderer {
-	public void prepare(GL4 gl);
+	public boolean isInitialized();
 
-	public void update(GL4 gl);
+	public void prepare(GL3 gl);
 
-	public void render(GL4 gl);
+	public boolean isReady();
 
-	public void destroy(GL4 gl);
+	public void update(GL3 gl);
+
+	public void render(GL3 gl);
+
+	public void destroy(GL3 gl);
 }

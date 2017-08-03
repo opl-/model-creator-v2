@@ -1,19 +1,20 @@
 package me.opl.apps.modelcreator2.model;
 
+import java.util.ArrayList;
+
+import me.opl.apps.modelcreator2.util.RayHelper;
 import me.opl.apps.modelcreator2.util.RotationHelper;
+import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.renderer.CuboidRenderer;
 import me.opl.apps.modelcreator2.viewport.renderer.Renderer;
 
-// TODO: abstract this
 public class Cuboid extends RotatableFragment {
 	private Position from;
 	private Position to;
 
-	private FaceData[] faceData;
+	private FaceData[] faces;
 
 	private Position[] cornerCache;
-
-	private CuboidRenderer renderer;
 
 	public Cuboid(Element element, Position from, Position to) {
 		super(element);
@@ -21,14 +22,12 @@ public class Cuboid extends RotatableFragment {
 		this.from = from.clone();
 		this.to = to.clone();
 
-		this.faceData = new FaceData[6];
-		for (Face face : Face.values()) faceData[face.ordinal()] = new FaceData(null, null, null);
+		this.faces = new FaceData[Face.values().length];
+		for (Face face : Face.values()) faces[face.ordinal()] = new FaceData(this, null, null, null);
 
 		cornerCache = new Position[8];
 		for (int i = 0; i < cornerCache.length; i++) cornerCache[i] = new Position(0f, 0f, 0f);
 		updateCornerCache();
-
-		renderer = new CuboidRenderer(this);
 	}
 
 	private void updateCornerCache() {
@@ -44,10 +43,44 @@ public class Cuboid extends RotatableFragment {
 		if (getElement() instanceof RotatableElement) {
 			RotatableElement element = (RotatableElement) getElement();
 
-			if (element.getRotationAxis() != null && element.getRotationAngle() != 0f) {
-				for (int i = 0; i < cornerCache.length; i++) RotationHelper.rotate(cornerCache[i], element.getRotationAxis(), element.getRotationAngle(), element.getRotationOrigin());
-			}
+			for (int i = 0; i < cornerCache.length; i++) RotationHelper.rotate(cornerCache[i], element.getRotation(), element.getRotationOrigin());
 		}
+
+		triggerUpdate();
+	}
+
+	/**
+	 * @param face Face to get the corners of
+	 * @return Array containing the corners of the given face
+	 */
+	public Position[] getFaceCorners(Face face) {
+		if (face == Face.DOWN) {
+			return new Position[] {cornerCache[0].clone(), cornerCache[3].clone(), cornerCache[1].clone(), cornerCache[2].clone()};
+		} else if (face == Face.NORTH) {
+			return new Position[] {cornerCache[1].clone(), cornerCache[7].clone(), cornerCache[0].clone(), cornerCache[4].clone()};
+		} else if (face == Face.EAST) {
+			return new Position[] {cornerCache[2].clone(), cornerCache[6].clone(), cornerCache[1].clone(), cornerCache[7].clone()};
+		} else if (face == Face.SOUTH) {
+			return new Position[] {cornerCache[3].clone(), cornerCache[5].clone(), cornerCache[2].clone(), cornerCache[6].clone()};
+		} else if (face == Face.WEST) {
+			return new Position[] {cornerCache[0].clone(), cornerCache[4].clone(), cornerCache[3].clone(), cornerCache[5].clone()};
+		} else if (face == Face.UP) {
+			return new Position[] {cornerCache[5].clone(), cornerCache[4].clone(), cornerCache[6].clone(), cornerCache[7].clone()};
+		}
+
+		throw new IllegalArgumentException("Tried to get corners for an invalid face (" + face + ")");
+	}
+
+	/**
+	 * Returns the {@link Face} the passed {@link FaceData} uses.
+	 *
+	 * @param faceData One of this cuboid's {@link FaceData} objects
+	 * @return {@link Face} the {@link FaceData} uses or {@code null} if the
+	 * passed face data doesn't belong to this cuboid 
+	 */
+	public Face faceDataToFace(FaceData faceData) {
+		for (int i = 0; i < faces.length; i++) if (faces[i] == faceData) return Face.values()[i];
+		return null;
 	}
 
 	/**
@@ -56,7 +89,19 @@ public class Cuboid extends RotatableFragment {
 	 * @return The Position object of the from position
 	 */
 	public Position getFrom() {
-		return from;
+		return from.clone();
+	}
+
+	/**
+	 * Sets the from position of this cuboid and updates the corner cache. The
+	 * from position is the corner with lowest coordinate values.
+	 *
+	 * @param newFrom New from position
+	 */
+	public void setFrom(Position newFrom) {
+		from.set(newFrom);
+
+		updateCornerCache();
 	}
 
 	/**
@@ -65,18 +110,68 @@ public class Cuboid extends RotatableFragment {
 	 * @return The Position object of the to position
 	 */
 	public Position getTo() {
-		return to;
+		return to.clone();
+	}
+
+	/**
+	 * Sets the to position of this cuboid and updates the corner cache. The to
+	 * position is the corner with highest coordinate values.
+	 *
+	 * @param newTo New to position
+	 */
+	public void setTo(Position newTo) {
+		to.set(newTo);
+
+		updateCornerCache();
+	}
+
+	/**
+	 * Sets this cuboids corners and updates the corner cache. The passed
+	 * arguments can describe any opposite corners of the cuboid.
+	 *
+	 * @param corner1 First corner
+	 * @param corner2 Second corner
+	 */
+	public void setCorners(Position corner1, Position corner2) {
+		from.set(Math.min(corner1.getX(), corner2.getX()), Math.min(corner1.getY(), corner2.getY()), Math.min(corner1.getZ(), corner2.getZ()));
+		to.set(Math.max(corner1.getX(), corner2.getX()), Math.max(corner1.getY(), corner2.getY()), Math.max(corner1.getZ(), corner2.getZ()));
+
+		updateCornerCache();
+	}
+
+	@Override
+	public FaceData[] getFaces() {
+		FaceData[] facesCopy = new FaceData[faces.length];
+		System.arraycopy(faces, 0, facesCopy, 0, faces.length);
+		return facesCopy;
 	}
 
 	public FaceData getFaceData(Face face) {
-		return faceData[face.ordinal()];
+		return faces[face.ordinal()];
 	}
 
 	public Position[] getCornerCache() {
 		return cornerCache;
 	}
 
-	public Renderer getRenderer() {
-		return renderer;
+	public Renderer createRenderer(RenderManager renderManager, BaseModel model) {
+		return new CuboidRenderer(renderManager, model, this);
+	}
+
+	@Override
+	public RayIntersection[] intersect(Ray ray) {
+		ArrayList<RayIntersection> intersections = new ArrayList<>(6);
+
+		for (Face f : Face.values()) {
+			Position[] corners = getFaceCorners(f);
+
+			Position pos = RayHelper.rayQuadIntersection(ray.start(), ray.end(), corners[0], corners[1], corners[2]);
+
+			if (pos != null) intersections.add(new RayIntersection(ray.start(), pos, getFaceData(f)));
+		}
+
+		RayIntersection[] array = new RayIntersection[intersections.size()];
+		intersections.toArray(array);
+		return array;
 	}
 }

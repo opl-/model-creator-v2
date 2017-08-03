@@ -1,38 +1,51 @@
 package me.opl.apps.modelcreator2.model;
 
 public abstract class RotatableElement extends Element {
-	private Axis rotationAxis;
+	private Rotation rotation;
 	private Position rotationOrigin;
-	private float rotationAngle;
+	private boolean rotationRescale = false;
 
+	/**
+	 * Just like {@link Element}, but additionally stores rotation data allowing
+	 * the element to be rotated. The rotation is used by the child
+	 * {@link Fragment}s.
+	 *
+	 * Uses (0,0,0) as rotation, (8,8,8) as origin.
+	 */
 	public RotatableElement() {
-		this.rotationAxis = null;
-		this.rotationOrigin = null;
-		this.rotationAngle = 0f;
+		this.rotation = new Rotation(0, 0, 0);
+		this.rotationOrigin = new Position(8, 8, 8);
 	}
 
-	public RotatableElement(Axis rotationAxis, Position rotationOrigin, float rotationAngle) {
-		this.rotationAxis = rotationAxis;
+	/**
+	 * Just like {@link Element}, but additionally stores rotation data allowing
+	 * the element to be rotated. The rotation is used by the child
+	 * {@link Fragment}s.
+	 *
+	 * @param rotation Rotation values
+	 * @param rotationOrigin Point to rotate around
+	 */
+	public RotatableElement(Rotation rotation, Position rotationOrigin) {
+		this.rotation = rotation.clone();
 		this.rotationOrigin = rotationOrigin.clone();
-		this.rotationAngle = rotationAngle;
 	}
 
 	/**
-	 * Get the rotation axis.
+	 * Get the rotation of this element and its fragments.
 	 *
-	 * @return Rotation axis
+	 * @return Current rotation
 	 */
-	public Axis getRotationAxis() {
-		return rotationAxis;
+	public Rotation getRotation() {
+		return rotation.clone();
 	}
 
 	/**
-	 * Set the rotation axis of this element and it's fragments.
+	 * Set the rotation of this element and its fragments.
 	 *
-	 * @param rotationAxis Rotation Axis
+	 * @param newRotation New rotation value
 	 */
-	public void setRotationAxis(Axis rotationAxis) {
-		this.rotationAxis = rotationAxis;
+	public void setRotation(Rotation newRotation) {
+		rotation.set(newRotation);
 	}
 
 	/**
@@ -45,21 +58,31 @@ public abstract class RotatableElement extends Element {
 	}
 
 	/**
-	 * Get the rotation angle of this element and it's fragments.
+	 * Set the rotation origin of this element and it's fragments. This modifies
+	 * the origin Position object.
 	 *
-	 * @return Rotation angle
+	 * @param newRotationOrigin New rotation origin
 	 */
-	public float getRotationAngle() {
-		return rotationAngle;
+	public void setRotationOrigin(Position newRotationOrigin) {
+		rotationOrigin.set(newRotationOrigin);
 	}
 
 	/**
-	 * Set the rotation angle of this element and it's fragments.
+	 * TODO: find out how to apply rescaling and add it to docs
 	 *
-	 * @param rotationAngle New rotation angle.
+	 * @return `true` if element should be rescaled, `false` otherwise
 	 */
-	public void setRotationAngle(float rotationAngle) {
-		this.rotationAngle = rotationAngle;
+	public boolean getRotationRescale() {
+		return rotationRescale;
+	}
+
+	/**
+	 * @param rotationRescale `true` if element should be rescaled, `false`
+	 * otherwise
+	 * @see RotatableElement#getRotationRescale()
+	 */
+	public void setRotationRescale(boolean rotationRescale) {
+		this.rotationRescale = rotationRescale;
 	}
 
 	@Override

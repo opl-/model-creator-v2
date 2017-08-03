@@ -46,10 +46,10 @@ public class EventDispatcher {
 		for (Entry<Class<? extends Event>, List<RegisteredListener>> e : eventListeners.entrySet()) {
 			List<RegisteredListener> listeners = e.getValue();
 
-			ArrayList<Integer> toRemove = new ArrayList<Integer>();
-			for (int i = 0; i < listeners.size(); i++) if (listeners.get(i).listener.get() == listener || listeners.get(i).listener.get() == null) toRemove.add(i);
+			ArrayList<RegisteredListener> toRemove = new ArrayList<>();
+			for (int i = 0; i < listeners.size(); i++) if (listeners.get(i).listener.get() == listener || listeners.get(i).listener.get() == null) toRemove.add(listeners.get(i));
 
-			if (listeners.size() - toRemove.size() > 0) for (Integer i : toRemove) listeners.remove(i);
+			if (listeners.size() - toRemove.size() > 0) for (RegisteredListener rl : toRemove) listeners.remove(rl);
 			else eventListeners.remove(e.getKey());
 		}
 	}
@@ -59,7 +59,7 @@ public class EventDispatcher {
 		if (params.length != 1 || !Event.class.isAssignableFrom(params[0])) throw new IllegalArgumentException("method doesn't accept one parameter of type Event");
 		Class<? extends Event> eventType = params[0].asSubclass(Event.class);
 
-		ArrayList<RegisteredListener> toRemove = new ArrayList<RegisteredListener>();
+		ArrayList<RegisteredListener> toRemove = new ArrayList<>();
 		List<RegisteredListener> listeners = eventListeners.get(eventType);
 
 		for (RegisteredListener rl : listeners) if (rl.listener.get() == listener && rl.method.equals(method) || rl.listener.get() == null) toRemove.add(rl);
@@ -70,7 +70,7 @@ public class EventDispatcher {
 
 	public void fire(Event event) {
 		Class<? extends Event> eventType = event.getClass();
-		ArrayList<RegisteredListener> toRemove = new ArrayList<RegisteredListener>();
+		ArrayList<RegisteredListener> toRemove = new ArrayList<>();
 
 		for (Entry<Class<? extends Event>, List<RegisteredListener>> e : eventListeners.entrySet()) {
 			for (RegisteredListener rl : e.getValue()) {

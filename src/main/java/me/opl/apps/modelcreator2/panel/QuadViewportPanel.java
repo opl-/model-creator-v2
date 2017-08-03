@@ -8,34 +8,34 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
-import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4.CameraMode;
-import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4.RenderMode;
-import me.opl.apps.modelcreator2.viewport.ViewportComponentGL4;
+import me.opl.apps.modelcreator2.MCVariableProvider;
+import me.opl.apps.modelcreator2.panel.viewport.ViewportJPanel;
+import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.CameraMode;
+import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.RenderMode;
 import me.opl.libs.tablib.AbstractPanel;
-import me.opl.libs.tablib.VariableProvider;
 
 public class QuadViewportPanel extends AbstractPanel {
 	private JPanel panel;
 
-	private ViewportComponentGL4[] mvcs;
+	private ViewportJPanel[] viewportComponents;
 
-	public QuadViewportPanel(VariableProvider vp) {
+	public QuadViewportPanel(MCVariableProvider vp) {
 		super(vp);
 
-		mvcs = new ViewportComponentGL4[] {
-			new ViewportComponentGL4(vp, CameraMode.ORTHO_WEST, RenderMode.MODEL),
-			new ViewportComponentGL4(vp, CameraMode.ORTHO_UP, RenderMode.MODEL),
-			new ViewportComponentGL4(vp, CameraMode.ORTHO_SOUTH, RenderMode.MODEL),
-			new ViewportComponentGL4(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED)
+		viewportComponents = new ViewportJPanel[] {
+			new ViewportJPanel(vp, CameraMode.ORTHO_WEST, RenderMode.MODEL),
+			new ViewportJPanel(vp, CameraMode.ORTHO_UP, RenderMode.MODEL),
+			new ViewportJPanel(vp, CameraMode.ORTHO_SOUTH, RenderMode.MODEL),
+			new ViewportJPanel(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED)
 		};
 
-		final JSplitPane topPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, mvcs[0], mvcs[1]);
+		final JSplitPane topPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, viewportComponents[0], viewportComponents[1]);
 		topPane.setDividerSize(1);
 		topPane.setResizeWeight(0.5d);
 		((BasicSplitPaneUI) topPane.getUI()).getDivider().setBorder(null);
 		((BasicSplitPaneUI) topPane.getUI()).getSplitPane().setBorder(null);
 
-		final JSplitPane bottomPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, mvcs[2], mvcs[3]);
+		final JSplitPane bottomPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, viewportComponents[2], viewportComponents[3]);
 		bottomPane.setDividerSize(1);
 		bottomPane.setResizeWeight(0.5d);
 		((BasicSplitPaneUI) bottomPane.getUI()).getDivider().setBorder(null);

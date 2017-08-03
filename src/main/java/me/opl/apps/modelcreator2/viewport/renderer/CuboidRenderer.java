@@ -1,107 +1,173 @@
 package me.opl.apps.modelcreator2.viewport.renderer;
 
-import javax.media.opengl.GL4;
+import com.jogamp.opengl.GL3;
 
+import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.Face;
 import me.opl.apps.modelcreator2.model.FaceData;
 import me.opl.apps.modelcreator2.model.Position;
+import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Texture;
-import me.opl.apps.modelcreator2.util.ModelBuffer;
+import me.opl.apps.modelcreator2.model.UV;
+import me.opl.apps.modelcreator2.viewport.RenderManager;
+import me.opl.apps.modelcreator2.viewport.resource.ModelBuffer;
 
 public class CuboidRenderer implements Renderer {
+	private BaseModel model;
 	private Cuboid cuboid;
+	private long lastUpdate = -1;
 
 	private ModelBuffer modelBuffer;
 
-	public CuboidRenderer(Cuboid cuboid) {
+	public CuboidRenderer(RenderManager renderManager, BaseModel model, Cuboid cuboid) {
+		this.model = model;
 		this.cuboid = cuboid;
 
-		modelBuffer = new ModelBuffer(4, 6);
+		modelBuffer = new ModelBuffer(renderManager, 4, 6);
 	}
 
 	@Override
-	public void prepare(GL4 gl) {
-		update(gl);
+	public boolean isInitialized() {
+		return modelBuffer.isInitialized();
+	}
 
+	@Override
+	public void prepare(GL3 gl) {
 		modelBuffer.prepare(gl);
+
+		update(gl);
 	}
 
 	@Override
-	public void update(GL4 gl) {
-		modelBuffer.setCurrentVertex(-1);
-
-		Position[] cc = cuboid.getCornerCache();
-
-		renderFace(cuboid.getFaceData(Face.DOWN), cc[0], cc[1], cc[3], cc[2]);
-		renderFace(cuboid.getFaceData(Face.NORTH), cc[1], cc[0], cc[7], cc[4]);
-		renderFace(cuboid.getFaceData(Face.EAST), cc[2], cc[1], cc[6], cc[7]);
-		renderFace(cuboid.getFaceData(Face.SOUTH), cc[3], cc[2], cc[5], cc[6]);
-		renderFace(cuboid.getFaceData(Face.WEST), cc[0], cc[3], cc[4], cc[5]);
-		renderFace(cuboid.getFaceData(Face.UP), cc[4], cc[5], cc[7], cc[6]);
+	public boolean isReady() {
+		return modelBuffer.isReady() && cuboid.getLastUpdate() == lastUpdate;
 	}
 
-	private void renderFace(FaceData faceData, Position c1, Position c2, Position c3, Position c4) {
-		Texture texture = faceData.getTexture();
+	@Override
+	public void update(GL3 gl) {
+		if (cuboid.getLastUpdate() == lastUpdate) return;
 
-		modelBuffer.addVertex(c1);
+		renderFace(Face.DOWN);
+		renderFace(Face.NORTH);
+		renderFace(Face.EAST);
+		renderFace(Face.SOUTH);
+		renderFace(Face.WEST);
+		renderFace(Face.UP);
 
-		float r = ((float) Math.random() + 1f) / 2f;
-		float g = ((float) Math.random() + 1f) / 2f;
-		float b = ((float) Math.random() + 1f) / 2f;
+		modelBuffer.update(gl);
+
+		lastUpdate = cuboid.getLastUpdate();
+	}
+
+	private void renderFace(Face face) {
+		FaceData faceData = cuboid.getFaceData(face);
+
+		// FIXME: make this actually stop rendering
+		if (!faceData.isVisible()) return;
+
+		Position[] corners = cuboid.getFaceCorners(face);
+
+		Texture texture = null;
+
+		if (faceData.getTexture() != null) {
+			texture = model.resolveTexture(faceData.getTexture());
+
+			if (texture == null) texture = new Texture("missingno", new ResourceLocation("missingno"));
+		}
+
+		UV uv = faceData.getUV();
+
+		if (uv == null && texture != null) {
+			switch (face) {
+			case DOWN:
+				uv = new UV(corners[0].getX(), corners[0].getZ(), corners[3].getX(), corners[3].getZ());
+				break;
+			case NORTH:
+				uv = new UV(16 - corners[0].getX(), corners[0].getY(), 16 - corners[3].getX(), corners[3].getY());
+				break;
+			case EAST:
+				uv = new UV(16 - corners[0].getZ(), corners[0].getY(), 16 - corners[3].getZ(), corners[3].getY());
+				break;
+			case SOUTH:
+				uv = new UV(corners[0].getX(), corners[0].getY(), corners[3].getX(), corners[3].getY());
+				break;
+			case WEST:
+				uv = new UV(corners[0].getZ(), corners[0].getY(), corners[3].getZ(), corners[3].getY());
+				break;
+			case UP:
+				uv = new UV(corners[0].getX(), 16 - corners[0].getZ(), corners[3].getX(), 16 - corners[3].getZ());
+				break;
+			}
+		}
+
+		modelBuffer.setCurrentVertex(face.ordinal() * 4 - 1);
+
+		int hashcode = faceData.getFragment().hashCode();
+
+		float r = (hashcode & 0xff) / 255f;
+		float g = ((hashcode >> 8) & 0xff) / 255f;
+		float b = ((hashcode >> 16) & 0xff) / 255f;
+
+		boolean selected = model.getModelWithElements().isFaceSelected(faceData);
+
+		modelBuffer.addVertex(corners[0]);
+		modelBuffer.setSelected(selected);
 
 		if (texture != null) {
-			//modelBuffer.setTexture(texture, false);
-			//modelBuffer.setUVCoord(, y)
-			modelBuffer.setColor(1f, 0f, 1f);
+			modelBuffer.setTexture(texture);
+			modelBuffer.setUV(uv.getX1(), uv.getY1(), 16);
+			modelBuffer.unsetColor();
 		} else {
-//			modelBuffer.setColor(0.3f, 0.7f, 0.45f);
 			modelBuffer.setColor(r, g, b);
 		}
 
-		modelBuffer.addVertex(c2);
+		modelBuffer.addVertex(corners[1]);
+		modelBuffer.setSelected(selected);
 
 		if (texture != null) {
-			//modelBuffer.setTexture(texture, false);
-			//modelBuffer.setUVCoord(, y)
-			modelBuffer.setColor(1f, 0f, 1f);
+			modelBuffer.setTexture(texture);
+			modelBuffer.setUV(uv.getX1(), uv.getY2(), 16);
+			modelBuffer.unsetColor();
 		} else {
-//			modelBuffer.setColor(0.3f, 0.7f, 0.45f);
 			modelBuffer.setColor(r, g, b);
 		}
 
-		modelBuffer.addVertex(c3);
+		modelBuffer.addVertex(corners[2]);
+		modelBuffer.setSelected(selected);
 
 		if (texture != null) {
-			//modelBuffer.setTexture(texture, false);
-			//modelBuffer.setUVCoord(, y)
-			modelBuffer.setColor(1f, 0f, 1f);
+			modelBuffer.setTexture(texture);
+			modelBuffer.setUV(uv.getX2(), uv.getY1(), 16);
+			modelBuffer.unsetColor();
 		} else {
-//			modelBuffer.setColor(0.3f, 0.7f, 0.45f);
 			modelBuffer.setColor(r, g, b);
 		}
 
-		modelBuffer.addVertex(c4);
+		modelBuffer.addVertex(corners[3]);
+		modelBuffer.setSelected(selected);
 
 		if (texture != null) {
-			//modelBuffer.setTexture(texture, false);
-			//modelBuffer.setUVCoord(, y)
-			modelBuffer.setColor(1f, 0f, 1f);
+			modelBuffer.setTexture(texture);
+			modelBuffer.setUV(uv.getX2(), uv.getY2(), 16);
+			modelBuffer.unsetColor();
 		} else {
-//			modelBuffer.setColor(0.3f, 0.7f, 0.45f);
 			modelBuffer.setColor(r, g, b);
 		}
 	}
 
 	@Override
-	public void render(GL4 gl) {
+	public void render(GL3 gl) {
 		modelBuffer.bind(gl);
-		gl.glDrawElements(GL4.GL_TRIANGLES, modelBuffer.getIndexCount(), GL4.GL_UNSIGNED_INT, 0);
+
+		// TODO: shouldnt this be in the ModelBuffer?
+		gl.glDrawElements(GL3.GL_TRIANGLES, modelBuffer.getIndexCount(), GL3.GL_UNSIGNED_INT, 0);
+
 		modelBuffer.unbind(gl);
 	}
 
 	@Override
-	public void destroy(GL4 gl) {
+	public void destroy(GL3 gl) {
 		modelBuffer.destroy(gl);
 	}
 }

@@ -3,7 +3,7 @@ package me.opl.apps.modelcreator2.viewport.renderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.media.opengl.GL4;
+import com.jogamp.opengl.GL3;
 
 import me.opl.apps.modelcreator2.model.Axis;
 import me.opl.apps.modelcreator2.model.Position;
@@ -12,22 +12,27 @@ import me.opl.apps.modelcreator2.util.GLHelper;
 public class RotationHandleRenderer implements Renderer {
 	private Axis axis;
 	private Position center;
-	private float range;
+	private float radius;
 
 	private ByteBuffer vertices;
 
-	private int vao;
+	private int vao = -1;
 	private int vbo;
 	private int ebo;
 
-	public RotationHandleRenderer(Axis axis, Position center, float range) {
+	public RotationHandleRenderer(Axis axis, Position center, float radius) {
 		this.axis = axis;
 		this.center = center;
-		this.range = range;
+		this.radius = radius;
 	}
 
 	@Override
-	public void prepare(GL4 gl) {
+	public boolean isInitialized() {
+		return vao != -1;
+	}
+
+	@Override
+	public void prepare(GL3 gl) {
 		vao = GLHelper.genVertexArray(gl);
 
 		gl.glBindVertexArray(vao);
@@ -39,7 +44,7 @@ public class RotationHandleRenderer implements Renderer {
 		vertices = ByteBuffer.allocate(48 * 8 * GLHelper.FLOAT_SIZE);
 		vertices.order(ByteOrder.nativeOrder());
 
-		this.update(gl);
+		update(gl);
 
 		ByteBuffer indices = ByteBuffer.allocate(48 * 2 * GLHelper.INTEGER_SIZE);
 		indices.order(ByteOrder.nativeOrder());
@@ -51,26 +56,31 @@ public class RotationHandleRenderer implements Renderer {
 
 		indices.flip();
 
-		gl.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, ebo);
-		gl.glBufferData(GL4.GL_ELEMENT_ARRAY_BUFFER, indices.capacity(), indices, GL4.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, ebo);
+		gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, indices.capacity(), indices, GL3.GL_STATIC_DRAW);
 
-		gl.glVertexAttribPointer(0, 3, GL4.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, 0);
+		gl.glVertexAttribPointer(0, 3, GL3.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, 0);
 		gl.glEnableVertexAttribArray(0);
-		gl.glVertexAttribPointer(1, 1, GL4.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, GLHelper.FLOAT_SIZE * 3);
+		gl.glVertexAttribPointer(1, 1, GL3.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, GLHelper.FLOAT_SIZE * 3);
 		gl.glEnableVertexAttribArray(1);
-		gl.glVertexAttribPointer(2, 4, GL4.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, GLHelper.FLOAT_SIZE * 4);
+		gl.glVertexAttribPointer(2, 4, GL3.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, GLHelper.FLOAT_SIZE * 4);
 		gl.glEnableVertexAttribArray(2);
 
 		gl.glBindVertexArray(0);
 	}
 
 	@Override
-	public void update(GL4 gl) {
+	public boolean isReady() {
+		return vao != -1;
+	}
+
+	@Override
+	public void update(GL3 gl) {
 		vertices.rewind();
 
 		for (int i = 0; i < 48; i++) {
-			float sin = (float) (Math.sin((float) i / 24f * Math.PI)) * range;
-			float cos = (float) (Math.cos((float) i / 24f * Math.PI)) * range;
+			float sin = (float) (Math.sin((float) i / 24f * Math.PI)) * radius;
+			float cos = (float) (Math.cos((float) i / 24f * Math.PI)) * radius;
 
 			vertices.putFloat(center.getX() + (axis == Axis.Y ? sin : axis == Axis.Z ? cos : 0));
 			vertices.putFloat(center.getY() + (axis == Axis.Z ? sin : axis == Axis.X ? cos : 0));
@@ -84,25 +94,26 @@ public class RotationHandleRenderer implements Renderer {
 
 		vertices.flip();
 
-		gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, vbo);
-		gl.glBufferData(GL4.GL_ARRAY_BUFFER, vertices.capacity(), vertices, GL4.GL_DYNAMIC_DRAW);
+		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vbo);
+		gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertices.capacity(), vertices, GL3.GL_DYNAMIC_DRAW);
 
 	}
 
 	@Override
-	public void render(GL4 gl) {
-		gl.glEnable(GL4.GL_BLEND);
+	public void render(GL3 gl) {
+		gl.glEnable(GL3.GL_BLEND);
 
 		gl.glBindVertexArray(vao);
-		gl.glDrawElements(GL4.GL_LINES, 96, GL4.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL3.GL_LINES, 96, GL3.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
 
-		gl.glDisable(GL4.GL_BLEND);
+		gl.glDisable(GL3.GL_BLEND);
 	}
 
 	@Override
-	public void destroy(GL4 gl) {
+	public void destroy(GL3 gl) {
 		gl.glDeleteBuffers(2, new int[] {vbo, ebo}, 0);
 		gl.glDeleteVertexArrays(1, new int[] {vao}, 0);
+		vbo = ebo = vao = -1;
 	}
 }
