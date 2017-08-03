@@ -1,5 +1,7 @@
 package me.opl.apps.modelcreator2.model;
 
+import com.jogamp.opengl.math.FloatUtil;
+
 public class Position implements Cloneable {
 	private float x;
 	private float y;
@@ -9,6 +11,12 @@ public class Position implements Cloneable {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+
+	public Position(float[] pos) {
+		this.x = pos[0];
+		this.y = pos[1];
+		this.z = pos[2];
 	}
 
 	public float getX() {
@@ -216,6 +224,11 @@ public class Position implements Cloneable {
 		return this.x * x + this.y * y + this.z * z;
 	}
 
+	/**
+	 * Normalizes this position object. Uses (0,0,0) as origin.
+	 *
+	 * @return This Position object
+	 */
 	public Position normalize() {
 		float l = distance(0f, 0f, 0f);
 		x /= l;
@@ -224,19 +237,33 @@ public class Position implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Normalizes this position object. Uses given position object as origin.
+	 *
+	 * @param origin Origin to use when normalizing
+	 * @return This Position object
+	 */
 	public Position normalize(Position origin) {
 		float l = distance(origin);
-		x /= l;
-		y /= l;
-		z /= l;
+		x = ((x - origin.getX()) / l) + origin.getX();
+		y = ((y - origin.getY()) / l) + origin.getY();
+		z = ((z - origin.getZ()) / l) + origin.getZ();
 		return this;
 	}
 
+	/**
+	 * Normalizes this position object. Uses given coordinates as origin.
+	 *
+	 * @param x X position to use as origin
+	 * @param y Y position to use as origin
+	 * @param z Z position to use as origin
+	 * @return This Position object
+	 */
 	public Position normalize(float x, float y, float z) {
 		float l = distance(x, y, z);
-		this.x /= l;
-		this.y /= l;
-		this.z /= l;
+		this.x = ((this.x - x) / l) + x;
+		this.y = ((this.y - y) / l) + y;
+		this.z = ((this.z - z) / l) + z;
 		return this;
 	}
 
@@ -248,6 +275,19 @@ public class Position implements Cloneable {
 	 */
 	public float[] toArray() {
 		return new float[] {x, y, z};
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (!(obj instanceof Position)) return false;
+
+		Position pos = (Position) obj;
+		return FloatUtil.isEqual(x, pos.x) && FloatUtil.isEqual(y, pos.y) && FloatUtil.isEqual(z, pos.z);
+	}
+
+	public boolean equals(float x, float y, float z) {
+		return FloatUtil.isEqual(this.x, x) && FloatUtil.isEqual(this.y, y) && FloatUtil.isEqual(this.z, z);
 	}
 
 	@Override

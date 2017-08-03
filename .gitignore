@@ -1,23 +1,13 @@
 ## Java
 *.class
+*.log
 *.jar
 *.war
 *.ear
+*.zip
+*.tar.gz
+*.rar
 hs_err_pid*
-
-## Eclipse
-*.pydevproject
-.metadata
-.gradle
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
 
 ## Maven
 target/

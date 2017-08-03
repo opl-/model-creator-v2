@@ -1,14 +1,21 @@
 #version 330 core
 
-uniform sampler2D[] textures;
+#define PI 3.14159265
 
+uniform sampler2D[] textures;
+uniform float time;
+
+in vec3 vPosition;
 /*
- 0-15  texture ID
-16-31  (texture ID + 16) + selection
-32     solid color
+bits name
+1-5  textureID
+6    use texture
+7    use color
+8    selected
 */
 flat in int vTexture;
-in vec3 vUVColor;
+in vec2 vUV;
+in vec3 vColor;
 
 out vec4 color;
 
@@ -32,15 +39,27 @@ sampler2D textureByID(int id) {
 }
 
 void main() {
-	if (vTexture >= 0 && vTexture < 32) {
-		color = texture(textureByID(vTexture % 16), vUVColor.st);
+	color = vec4(1f, 1f, 1f, 0f);
 
-		if (vTexture >= 16) {
-			color = mix(color, vec4(1f, 1f, 0f, 0f), 0.5f);
+	if ((vTexture & 0x20) != 0) {
+		color = texture(textureByID(vTexture & 0x1f), vUV);
+
+		if ((vTexture & 0x40) != 0) {
+			color = mix(color, vec4(vColor, 1f), 0.5f);
 		}
-	} else if (vTexture == 32) {
-		color = vec4(vUVColor, 1f);
-	} else {
-		color = vec4(1f, 0f, 1f, 1f);
+	} else if ((vTexture & 0x40) != 0) {
+		color = vec4(vColor, 1f);
+	}
+
+	if ((vTexture & 0x80) != 0) {
+		vec3 pos = vPosition + 0.0001f;
+		pos -= floor(pos);
+
+		float lines = pos.x + pos.y + pos.z;
+
+		float mixRatio = lines < 0.5f || (lines > 1f && lines < 1.5f) ? 0.1f : 0.4f;
+		mixRatio += 0.05f * sin(time * PI);
+
+		color = mix(color, vec4(1f, 1f, 0f, 1f), mixRatio);
 	}
 }

@@ -1,70 +1,62 @@
 package me.opl.apps.modelcreator2.tool;
 
-import java.awt.event.MouseEvent;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.List;
 
-import me.opl.apps.modelcreator2.ModelWindow;
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
+import me.opl.apps.modelcreator2.tool.tool.MoveTool;
+import me.opl.apps.modelcreator2.tool.tool.RotateTool;
 
 public class ToolManager {
-	private static final List<Class<? extends Tool>> LISTED_TOOLS = new ArrayList<Class<? extends Tool>>();
-
-	private ModelWindow mw;
+	private ArrayList<Tool> tools = new ArrayList<>();
 
 	private Tool activeTool;
 
-	public ToolManager(ModelWindow mw) {
-		this.mw = mw;
+	public ToolManager() {
+		registerTool(new MoveTool());
+		registerTool(new RotateTool());
 
-		setTool(MoveTool.class);
+		setActiveTool(MoveTool.class);
+		// TODO: make creating tools dynamic
 	}
 
-	static {
-		// TODO: move to core plugin?
-		registerTool(MoveTool.class);
-		registerTool(RotateTool.class);
-	}
+	public boolean registerTool(Tool tool) {
+		if (tools.contains(tool)) return true;
 
-	public static void registerTool(Class<? extends Tool> tool) {
-		LISTED_TOOLS.add(tool);
+		tools.add(tool);
 		// TODO: fire event
+
+		return true;
 	}
 
-	public BaseModel getModel() {
-		return mw.getModel();
+	public Tool getActiveTool() {
+		return activeTool;
 	}
 
-	public void setTool(Class<? extends Tool> tool) throws IllegalArgumentException {
-		try {
-			Constructor<? extends Tool> toolConstructor = tool.getConstructor(ToolManager.class);
-			if (activeTool != null) activeTool.onDeactivated();
-			activeTool = toolConstructor.newInstance(this);
-			activeTool.onActivated();
-			// TODO: fire event
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
+	public boolean setActiveTool(Tool tool) {
+		if (activeTool == tool) return false;
+
+		if (activeTool != null) activeTool.onDeactivated();
+
+		activeTool = tool;
+		tool.onActivated();
+
+		return true;
+	}
+
+	public boolean setActiveTool(Class<? extends Tool> toolClass) throws IllegalArgumentException {
+		for (Tool t : tools) if (toolClass.isAssignableFrom(t.getClass())) {
+			setActiveTool(t);
+			return true;
 		}
+
+		return false;
 	}
 
-	public void onMouseClicked(MouseEvent e) {
-		activeTool.onMouseClicked(e);
-	}
-
-	public void onMousePressed(MouseEvent e) {
-		activeTool.onMousePressed(e);
-	}
-
-	public void onMouseReleased(MouseEvent e) {
-		activeTool.onMouseReleased(e);
-	}
-
-	public void onMouseDragged(MouseEvent e) {
-		activeTool.onMouseDragged(e);
-	}
-
-	public void onMouseMoved(MouseEvent e) {
-		activeTool.onMouseMoved(e);
+	public void firePointerEvent(PointerToolEvent event) {
+		if (event.getType() != PointerEventType.HOVER && event.getType() != PointerEventType.DRAG) {
+			System.out.println(event.getType() + " " + event.getPressCount());
+			System.out.println(event.isButtonDown(1) + " " + event.isButtonDown(2) + " " + event.isButtonDown(3) + " " + event.isButtonDown(4));
+		}
+		if (activeTool != null && event != null) activeTool.onPointerEvent(event);
 	}
 }
