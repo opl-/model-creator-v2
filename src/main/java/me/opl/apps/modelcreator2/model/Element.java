@@ -13,14 +13,6 @@ public abstract class Element {
 
 	public abstract FaceData[] getFaces();
 
-	/**
-	 * Returns the passed face's normal.
-	 *
-	 * @param faceData {@link FaceData} instance belonging to this element
-	 * @return The normal of the passed face
-	 */
-	public abstract Position getFaceNormal(FaceData faceData);
-
 	public abstract Position getFrom();
 
 	public abstract void setFrom(Position from);
@@ -29,6 +21,39 @@ public abstract class Element {
 
 	public abstract void setTo(Position to);
 
+	/**
+	 * Returns the {@link Face} the passed {@link FaceData} is on.
+	 *
+	 * @param faceData One of this element's {@link FaceData} objects
+	 * @return {@link Face} the {@link FaceData} is on or {@code null} if the
+	 * passed face data doesn't belong to this element
+	 */
+	public abstract Face faceDataToFace(FaceData faceData);
+
+	/**
+	 * Returns the passed face's normal.
+	 *
+	 * @param face {@link Face} to get the normal of
+	 * @return The normal of the passed face
+	 */
+	public abstract Position getFaceNormal(Face face);
+
+	/**
+	 * Returns the corners of the given face. Elements that support rotation
+	 * will return corners of that face before rotation.
+	 *
+	 * @param face Face to return the corners for
+	 * @return Array of corners before rotation of the given face
+	 */
+	public abstract Position[] getFaceCornersNoRotation(Face face);
+
+	/**
+	 * Returns the corners of the given face. Elements that support rotation
+	 * will return corners of that face after rotation.
+	 *
+	 * @param face Face to return the corners for
+	 * @return Array of corners after rotation of the given face
+	 */
 	public abstract Position[] getFaceCorners(Face face);
 
 	/**
@@ -40,5 +65,5 @@ public abstract class Element {
 	 */
 	public abstract void setCorners(Position corner1, Position corner2);
 
-	public abstract RayIntersection[] intersect(Ray ray);
+	public abstract RayFaceIntersection[] intersect(Ray ray);
 }

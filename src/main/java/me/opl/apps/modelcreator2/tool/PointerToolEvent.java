@@ -7,16 +7,18 @@ import java.util.Comparator;
 import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
 import me.opl.apps.modelcreator2.model.Ray;
-import me.opl.apps.modelcreator2.model.RayIntersection;
+import me.opl.apps.modelcreator2.model.RayFaceIntersection;
 import me.opl.apps.modelcreator2.util.RayHelper;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer;
 
-// TODO: Add method to get the current state of a button
-// TODO: Fire the events
 public class PointerToolEvent extends ToolEvent {
 	public static final int BUTTON_LEFT = 1;
 	public static final int BUTTON_MIDDLE = 2;
 	public static final int BUTTON_RIGHT = 3;
+
+	public static final int MODIFIER_CONTROL = 0x1;
+	public static final int MODIFIER_SHIFT = 0x2;
+	public static final int MODIFIER_ALT = 0x4;
 
 	private ViewportFramebufferRenderer framebufferRenderer;
 	private PointerEventType type;
@@ -30,15 +32,16 @@ public class PointerToolEvent extends ToolEvent {
 	private float scroll;
 	private boolean controlDown;
 	private boolean shiftDown;
+	private boolean altDown;
 	private Ray ray;
 	private Ray lastRay;
-	private RayIntersection[] rayIntersections;
+	private RayFaceIntersection[] rayIntersections;
 
-	public PointerToolEvent(ViewportFramebufferRenderer framebufferRenderer, PointerEventType type, int button, int buttonStates, int pressCount, float x, float y, float lastX, float lastY, boolean controlDown, boolean shiftDown) {
-		this(framebufferRenderer, type, button, buttonStates, pressCount, x, y, lastX, lastY, 0, controlDown, shiftDown);
+	public PointerToolEvent(ViewportFramebufferRenderer framebufferRenderer, PointerEventType type, int button, int buttonStates, int pressCount, float x, float y, float lastX, float lastY, boolean controlDown, boolean shiftDown, boolean altDown) {
+		this(framebufferRenderer, type, button, buttonStates, pressCount, x, y, lastX, lastY, 0, controlDown, shiftDown, altDown);
 	}
 
-	public PointerToolEvent(ViewportFramebufferRenderer framebufferRenderer, PointerEventType type, int button, int buttonStates, int pressCount, float x, float y, float lastX, float lastY, float scroll, boolean controlDown, boolean shiftDown) {
+	public PointerToolEvent(ViewportFramebufferRenderer framebufferRenderer, PointerEventType type, int button, int buttonStates, int pressCount, float x, float y, float lastX, float lastY, float scroll, boolean controlDown, boolean shiftDown, boolean altDown) {
 		this.framebufferRenderer = framebufferRenderer;
 		this.type = type;
 		this.button = button;
@@ -51,6 +54,7 @@ public class PointerToolEvent extends ToolEvent {
 		this.scroll = scroll;
 		this.controlDown = controlDown;
 		this.shiftDown = shiftDown;
+		this.altDown = altDown;
 
 		ray = RayHelper.rayFromClick(framebufferRenderer, x, y);
 		lastRay = RayHelper.rayFromClick(framebufferRenderer, x, y);
@@ -118,6 +122,34 @@ public class PointerToolEvent extends ToolEvent {
 
 	public boolean isRightButtonDown() {
 		return (buttonStates & 0b100) != 0;
+	}
+
+	// TODO: change name, docs
+	public boolean testDown(int button, int modifiers) {
+		return testDown(button, modifiers, 0);
+	}
+
+	// TODO: change name, docs
+	public boolean testDown(int button, int modifiers, int optionalModifiers) {
+		if ((modifiers & optionalModifiers) != 0) throw new IllegalArgumentException("One of required modifiers is on the optional modifiers list");
+		if (this.button != button) return false;
+		if (modifiers != (((controlDown ? MODIFIER_CONTROL : 0) | (shiftDown ? MODIFIER_SHIFT : 0) | (altDown ? MODIFIER_ALT : 0)) & ~optionalModifiers)) return false;
+
+		return true;
+	}
+
+	// TODO: change name, docs
+	public boolean testHeld(int button, int modifiers) {
+		return testHeld(button, modifiers, 0);
+	}
+
+	// TODO: change name, docs
+	public boolean testHeld(int button, int modifiers, int optionalModifiers) {
+		if ((modifiers & optionalModifiers) != 0) throw new IllegalArgumentException("One of required modifiers is on the optional modifiers list");
+		if (button > 0 && (getButtonMask(button) & buttonStates) == 0) return false;
+		if (modifiers != (((controlDown ? MODIFIER_CONTROL : 0) | (shiftDown ? MODIFIER_SHIFT : 0) | (altDown ? MODIFIER_ALT : 0)) & ~optionalModifiers)) return false;
+
+		return true;
 	}
 
 	/**
@@ -203,41 +235,45 @@ public class PointerToolEvent extends ToolEvent {
 	}
 
 	/**
-	 * Intersects this event's ray with faces in the model returned by
-	 * {@link PointerToolEvent#getEditedModel()} and caches the result.
+	 * Intersects this event's ray intersections with faces in the model
+	 * returned by {@link PointerToolEvent#getEditedModel()} and caches the
+	 * result.
 	 *
 	 * @return Array of ray intersections sorted from closest to farthest
 	 */
-	public RayIntersection[] getRayIntersections() {
-		if (rayIntersections == null) {
-			BaseModel editedModel = getEditedModel();
+	public RayFaceIntersection[] getRayIntersections() {
+		if (rayIntersections == null) rayIntersections = intersectRay(ray);
 
-			if (editedModel == null) {
-				rayIntersections = new RayIntersection[0];
-			} else {
-				ArrayList<RayIntersection> intersections = new ArrayList<>();
-
-				for (Element e : editedModel.getElements()) {
-					RayIntersection[] fragmentIntersections = e.intersect(ray);
-
-					for (RayIntersection i : fragmentIntersections) intersections.add(i);
-				}
-
-				rayIntersections = new RayIntersection[intersections.size()];
-				intersections.toArray(rayIntersections);
-
-				Arrays.sort(rayIntersections, new Comparator<RayIntersection>() {
-					@Override
-					public int compare(RayIntersection a, RayIntersection b) {
-						return (int) (a.distance() - b.distance());
-					}
-				});
-			}
-		}
-
-		RayIntersection[] intersectionsCopy = new RayIntersection[rayIntersections.length];
+		RayFaceIntersection[] intersectionsCopy = new RayFaceIntersection[rayIntersections.length];
 		System.arraycopy(rayIntersections, 0, intersectionsCopy, 0, intersectionsCopy.length);
 		return intersectionsCopy;
+	}
+
+	private RayFaceIntersection[] intersectRay(Ray ray) {
+		BaseModel editedModel = getEditedModel();
+
+		if (editedModel == null) return new RayFaceIntersection[0];
+
+		ArrayList<RayFaceIntersection> intersections = new ArrayList<>();
+
+		for (Element e : editedModel.getElements()) {
+			RayFaceIntersection[] fragmentIntersections = e.intersect(ray);
+
+			for (RayFaceIntersection i : fragmentIntersections) intersections.add(i);
+		}
+
+		RayFaceIntersection[] rayIntersections = intersections.toArray(new RayFaceIntersection[intersections.size()]);
+
+		Arrays.sort(rayIntersections, new Comparator<RayFaceIntersection>() {
+			@Override
+			public int compare(RayFaceIntersection a, RayFaceIntersection b) {
+				float ad = a.distance();
+				float bd = b.distance();
+				return ad == bd ? 0 : ad > bd ? 1 : -1;
+			}
+		});
+
+		return rayIntersections;
 	}
 
 	/**

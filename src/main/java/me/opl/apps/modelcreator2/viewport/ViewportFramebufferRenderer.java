@@ -9,6 +9,7 @@ import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
 import me.opl.apps.modelcreator2.model.Fragment;
 import me.opl.apps.modelcreator2.model.Position;
+import me.opl.apps.modelcreator2.util.RotationHelper;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.CameraMode.View;
 import me.opl.apps.modelcreator2.viewport.renderer.BoundaryRenderer;
 import me.opl.apps.modelcreator2.viewport.renderer.CompassOverlayRenderer;
@@ -34,7 +35,8 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 
 	private int width = 0;
 	private int height = 0;
-	private float[] viewProjectionMatrix;
+	private float[] viewProjectionMatrix = new float[32];
+	private float[] viewProjectionMatrixUnproject = new float[32];
 
 	private BoundaryRenderer boundaryRenderer;
 	private CompassOverlayRenderer compassOverlayRenderer;
@@ -62,8 +64,6 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		cameraTarget = new Position(8f, 8f, 8f);
 		cameraPosition = new Position(100f, 80f, -42f).subtract(cameraTarget).normalize().multiply(50f).add(cameraTarget);
 
-		viewProjectionMatrix = new float[32];
-
 		boundaryRenderer = renderManager.getRenderer(BoundaryRenderer.class);
 		compassOverlayRenderer = renderManager.getRenderer(CompassOverlayRenderer.class);
 
@@ -83,9 +83,11 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		height = framebuffer.getHeight();
 
 		FloatUtil.makeLookAt(viewProjectionMatrix, 0, (!cameraMode.hasDirection() ? cameraPosition : cameraTarget.clone().subtract(cameraMode.getDirection().multiply(cameraTarget.distance(cameraPosition)))).toArray(), 0, cameraTarget.toArray(), 0, new float[] {0, 1, 0}, 0, new float[16]);
+		System.arraycopy(viewProjectionMatrix, 0, viewProjectionMatrixUnproject, 0, 16);
 
 		if (cameraMode.getView() == View.PERSPECTIVE) {
-			FloatUtil.makePerspective(viewProjectionMatrix, 16, true, 45f, (float) width / (float) height, 1f, 1000f);
+			FloatUtil.makePerspective(viewProjectionMatrix, 16, true, 60f * RotationHelper.TO_RADIANS, (float) width / (float) height, 0.2f, 1000f);
+			FloatUtil.makePerspective(viewProjectionMatrixUnproject, 16, true, 60f * RotationHelper.TO_RADIANS, (float) width / (float) height, 1f, 1000f);
 		} else if (cameraMode.getView() == View.ORTHO) {
 			float dist = cameraTarget.distance(cameraPosition) * 1000f;
 			float ar = (float) width  / (float) height;
@@ -94,6 +96,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 			float left = dist / (float) width / 2f * ar;
 
 			FloatUtil.makeOrtho(viewProjectionMatrix, 16, true, -left, left, -up, up, 1f, 1000f);
+			System.arraycopy(viewProjectionMatrix, 16, viewProjectionMatrixUnproject, 16, 16);
 		}
 
 		float[] projectionView = new float[16];
@@ -104,8 +107,10 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 
 		ToolRenderer toolRenderer = renderManager.getToolRenderer(modelCreator.getToolManager(model.getModelWithElements()).getActiveTool());
 
-		if (!toolRenderer.isInitialized()) toolRenderer.prepare(gl);
-		if (!toolRenderer.isReady()) toolRenderer.update(gl);
+		if (toolRenderer != null) {
+			if (!toolRenderer.isInitialized()) toolRenderer.prepare(gl);
+			if (!toolRenderer.isReady()) toolRenderer.update(gl);
+		}
 
 		modelShader.bind(gl);
 
@@ -122,7 +127,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		int texturesUniform = gl.glGetUniformLocation(modelShader.glID(), "textures");
 		gl.glUniform1iv(texturesUniform, 16, new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, 0);
 
-		toolRenderer.renderBeforeModel(gl);
+		if (toolRenderer != null) toolRenderer.renderBeforeModel(gl);
 
 		modelShader.bind(gl);
 
@@ -138,7 +143,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 			}
 		}
 
-		toolRenderer.renderAfterModel(gl);
+		if (toolRenderer != null) toolRenderer.renderAfterModel(gl);
 
 
 		lineShader.bind(gl);
@@ -163,14 +168,13 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 
 		if (!getRenderMode().isPlainRender()) {
 			boundaryRenderer.render(gl);
-			toolRenderer.renderLines(gl);
+			if (toolRenderer != null) toolRenderer.renderLines(gl);
 			gl.glDisable(GL3.GL_DEPTH_TEST);
 			compassOverlayRenderer.render(gl);
 			gl.glEnable(GL3.GL_DEPTH_TEST);
 		}
 
 		gl.glDisable(GL3.GL_POLYGON_SMOOTH);
-		// TODO
 	}
 
 	public CameraMode getCameraMode() {
@@ -218,8 +222,24 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		return cameraMode.hasDirection() ? cameraMode.getDirection() : cameraTarget.clone().subtract(cameraPosition).normalize();
 	}
 
+	/**
+	 * Returns the view projection matrices used on last render.
+	 *
+	 * @return Look-at matrix at 0-15, frustrum/orthogonal matrix at 16-31
+	 */
 	public float[] getViewProjectionMatrix() {
 		return viewProjectionMatrix;
+	}
+
+	/**
+	 * Returns the view projection matrices used on last render. The projection
+	 * matrix returned by this method has the near clip plane set to 1, because
+	 * values smaller than 1 break unprojecting.
+	 *
+	 * @return Look-at matrix at 0-15, frustrum/orthogonal matrix at 16-31
+	 */
+	public float[] getViewProjectionMatrixUnproject() {
+		return viewProjectionMatrixUnproject;
 	}
 
 	public int getWidth() {

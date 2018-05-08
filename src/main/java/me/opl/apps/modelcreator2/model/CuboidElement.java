@@ -1,27 +1,19 @@
 package me.opl.apps.modelcreator2.model;
 
-import me.opl.apps.modelcreator2.util.RotationHelper;
+import me.opl.apps.modelcreator2.event.ElementsResizedEvent;
+import me.opl.apps.modelcreator2.event.ElementsRotatedEvent;
 
 public class CuboidElement extends RotatableElement {
-	private Position from;
-	private Position to;
-	private Position[] cornerCache;
-
+	private BaseModel model;
 	private Cuboid cuboid;
 
-	public CuboidElement() {
-		this(new Position(0, 0, 0), new Position(16, 16, 16));
+	public CuboidElement(BaseModel model) {
+		this(model, new Position(0, 0, 0), new Position(16, 16, 16));
 	}
 
-	public CuboidElement(Position from, Position to) {
-		this.from = from.clone();
-		this.to = to.clone();
-
-		cuboid = new Cuboid(this, this.from, this.to);
-
-		cornerCache = new Position[8];
-		for (int i = 0; i < cornerCache.length; i++) cornerCache[i] = new Position(0f, 0f, 0f);
-		updateCornerCache();
+	public CuboidElement(BaseModel model, Position from, Position to) {
+		this.model = model;
+		cuboid = new Cuboid(this, from, to);
 	}
 
 	@Override
@@ -34,17 +26,6 @@ public class CuboidElement extends RotatableElement {
 		return cuboid.getFaces();
 	}
 
-	@Override
-	public Position getFaceNormal(FaceData faceData) {
-		Face face = cuboid.faceDataToFace(faceData);
-		Position[] corners = cuboid.getFaceCorners(face);
-
-		Position u = corners[1].clone().subtract(corners[0]);
-		Position v = corners[2].clone().subtract(corners[0]);
-
-		return u.cross(v).normalize();
-	}
-
 	/**
 	 * @return This element's {@link Cuboid} fragment
 	 */
@@ -54,28 +35,26 @@ public class CuboidElement extends RotatableElement {
 
 	@Override
 	public Position getFrom() {
-		return from.clone();
+		return cuboid.getFrom();
 	}
 
 	@Override
 	public void setFrom(Position newFrom) {
-		from.set(newFrom);
 		cuboid.setFrom(newFrom);
 
-		updateCornerCache();
+		model.getEventDispatcher().fire(new ElementsResizedEvent(model, new Element[] {this}));
 	}
 
 	@Override
 	public Position getTo() {
-		return to.clone();
+		return cuboid.getTo();
 	}
 
 	@Override
 	public void setTo(Position newTo) {
-		to.set(newTo);
 		cuboid.setTo(newTo);
 
-		updateCornerCache();
+		model.getEventDispatcher().fire(new ElementsResizedEvent(model, new Element[] {this}));
 	}
 
 	/**
@@ -85,49 +64,64 @@ public class CuboidElement extends RotatableElement {
 	 * @param corner1 First corner
 	 * @param corner2 Second corner
 	 */
+	@Override
 	public void setCorners(Position corner1, Position corner2) {
-		from.set(Math.min(corner1.getX(), corner2.getX()), Math.min(corner1.getY(), corner2.getY()), Math.min(corner1.getZ(), corner2.getZ()));
-		to.set(Math.max(corner1.getX(), corner2.getX()), Math.max(corner1.getY(), corner2.getY()), Math.max(corner1.getZ(), corner2.getZ()));
+		cuboid.setCorners(corner1, corner2);
 
-		cuboid.setCorners(from, to);
+		model.getEventDispatcher().fire(new ElementsResizedEvent(model, new Element[] {this}));
+	}
 
-		updateCornerCache();
+	@Override
+	public void setRotation(Rotation newRotation) {
+		super.setRotation(newRotation);
+		cuboid.updateCornerCache();
+
+		model.getEventDispatcher().fire(new ElementsRotatedEvent(model, new Element[] {this}));
+	}
+
+	@Override
+	public void setRotationOrigin(Position newRotationOrigin) {
+		super.setRotationOrigin(newRotationOrigin);
+		cuboid.updateCornerCache();
+
+		model.getEventDispatcher().fire(new ElementsRotatedEvent(model, new Element[] {this}));
+	}
+
+	@Override
+	public void setRotationRescale(boolean rotationRescale) {
+		super.setRotationRescale(rotationRescale);
+		cuboid.updateCornerCache();
+
+		model.getEventDispatcher().fire(new ElementsRotatedEvent(model, new Element[] {this}));
+	}
+
+	@Override
+	public Face faceDataToFace(FaceData faceData) {
+		return cuboid.faceDataToFace(faceData);
+	}
+
+	@Override
+	public Position getFaceNormal(Face face) {
+		Position[] corners = cuboid.getFaceCorners(face);
+
+		Position u = corners[1].clone().subtract(corners[0]);
+		Position v = corners[2].clone().subtract(corners[0]);
+
+		return v.cross(u).normalize();
 	}
 
 	@Override
 	public Position[] getFaceCorners(Face face) {
-		if (face == Face.DOWN) {
-			return new Position[] {cornerCache[0], cornerCache[3], cornerCache[1], cornerCache[2]};
-		} else if (face == Face.NORTH) {
-			return new Position[] {cornerCache[1], cornerCache[7], cornerCache[0], cornerCache[4]};
-		} else if (face == Face.EAST) {
-			return new Position[] {cornerCache[2], cornerCache[6], cornerCache[1], cornerCache[7]};
-		} else if (face == Face.SOUTH) {
-			return new Position[] {cornerCache[3], cornerCache[5], cornerCache[2], cornerCache[6]};
-		} else if (face == Face.WEST) {
-			return new Position[] {cornerCache[0], cornerCache[4], cornerCache[3], cornerCache[5]};
-		} else if (face == Face.UP) {
-			return new Position[] {cornerCache[5], cornerCache[4], cornerCache[6], cornerCache[7]};
-		}
-
-		return null;
+		return cuboid.getFaceCorners(face);
 	}
 
 	@Override
-	public RayIntersection[] intersect(Ray ray) {
-		return cuboid.intersect(ray);
+	public Position[] getFaceCornersNoRotation(Face face) {
+		return cuboid.getFaceCornersNoRotation(face);
 	}
 
-	private void updateCornerCache() {
-		cornerCache[0].set(from.getX(), from.getY(), from.getZ());
-		cornerCache[1].set(to.getX(), from.getY(), from.getZ());
-		cornerCache[2].set(to.getX(), from.getY(), to.getZ());
-		cornerCache[3].set(from.getX(), from.getY(), to.getZ());
-		cornerCache[4].set(from.getX(), to.getY(), from.getZ());
-		cornerCache[5].set(from.getX(), to.getY(), to.getZ());
-		cornerCache[6].set(to.getX(), to.getY(), to.getZ());
-		cornerCache[7].set(to.getX(), to.getY(), from.getZ());
-
-		if (!getRotation().equalsr(0, 0, 0)) for (int i = 0; i < cornerCache.length; i++) RotationHelper.rotate(cornerCache[i], getRotation(), getRotationOrigin());
+	@Override
+	public RayFaceIntersection[] intersect(Ray ray) {
+		return cuboid.intersect(ray);
 	}
 }

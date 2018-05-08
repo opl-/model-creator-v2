@@ -25,8 +25,9 @@ public class LineBuffer implements Resource {
 	private int ebo;
 
 	private int position = -1;
-	private int vertexLength = 0;
-	private int indexLength = 0;
+	private int lastMove = -1;
+	private int vertexCount = 0;
+	private int indexCount = 0;
 
 	private boolean dirty = true;
 
@@ -38,13 +39,24 @@ public class LineBuffer implements Resource {
 	}
 
 	public int getIndiceCount() {
-		return indexLength;
+		return indexCount;
+	}
+
+	public int getPosition() {
+		return position + 1;
 	}
 
 	public LineBuffer setPosition(int position) {
 		if (position < 0 || position >= points) throw new IllegalArgumentException("Position out of range (" + position + "/" + points + ")");
 
 		this.position = position - 1;
+
+		return this;
+	}
+
+	public LineBuffer setToLastPosition() {
+		// XXX: this might be wrong. idk
+		this.position = vertexCount - 1;
 
 		return this;
 	}
@@ -57,14 +69,14 @@ public class LineBuffer implements Resource {
 		vertices.putFloat(offset + GLHelper.FLOAT_SIZE, y);
 		vertices.putFloat(offset + GLHelper.FLOAT_SIZE * 2, z);
 
-		vertexLength = Math.max(vertexLength, position + 1);
+		lastMove = position;
+		vertexCount = Math.max(vertexCount, position + 1);
 
 		return this;
 	}
 
 	public LineBuffer lineTo(float x, float y, float z) {
 		if (position == -1) throw new IllegalStateException("Called lineTo on first segment");
-		if (position < vertexLength - 1) throw new IllegalStateException("Called lineTo on already defined lines");
 
 		position++;
 		int offset = position * SIZE_PER_VERTEX + OFFSET_POSITION;
@@ -73,11 +85,23 @@ public class LineBuffer implements Resource {
 		vertices.putFloat(offset + GLHelper.FLOAT_SIZE, y);
 		vertices.putFloat(offset + GLHelper.FLOAT_SIZE * 2, z);
 
-		vertexLength = Math.max(vertexLength, position + 1);
+		if (position == vertexCount) {
+			indices.putInt(position - 1);
+			indices.putInt(position);
+			indexCount += 2;
+		}
 
-		indices.putInt(position - 1);
-		indices.putInt(position);
-		indexLength += 2;
+		vertexCount = Math.max(vertexCount, position + 1);
+
+		return this;
+	}
+
+	public LineBuffer closeLine() {
+		if (position == vertexCount - 1) {
+			indices.putInt(position);
+			indices.putInt(lastMove);
+			indexCount += 2;
+		}
 
 		return this;
 	}
@@ -118,11 +142,13 @@ public class LineBuffer implements Resource {
 
 		vertices.clear();
 		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vbo);
-		gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertexLength * SIZE_PER_VERTEX, vertices, GL3.GL_DYNAMIC_DRAW);
+		gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertexCount * SIZE_PER_VERTEX, vertices, GL3.GL_DYNAMIC_DRAW);
 
 		indices.clear();
 		gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, ebo);
-		gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, indexLength * GLHelper.INTEGER_SIZE, indices, GL3.GL_DYNAMIC_DRAW);
+		gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, indexCount * GLHelper.INTEGER_SIZE, indices, GL3.GL_DYNAMIC_DRAW);
+
+		dirty = false;
 
 		gl.glVertexAttribPointer(0, 3, GL3.GL_FLOAT, false, GLHelper.FLOAT_SIZE * 8, 0);
 		gl.glEnableVertexAttribArray(0);
@@ -143,11 +169,13 @@ public class LineBuffer implements Resource {
 	public void update(GL3 gl) {
 		vertices.clear();
 		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vbo);
-		gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertexLength * SIZE_PER_VERTEX, vertices, GL3.GL_DYNAMIC_DRAW);
+		gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertexCount * SIZE_PER_VERTEX, vertices, GL3.GL_DYNAMIC_DRAW);
 
 		indices.clear();
 		gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, ebo);
-		gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, indexLength * GLHelper.INTEGER_SIZE, indices, GL3.GL_DYNAMIC_DRAW);
+		gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, indexCount * GLHelper.INTEGER_SIZE, indices, GL3.GL_DYNAMIC_DRAW);
+
+		dirty = false;
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class BlockState {
 
 		BlockStateNameChange event = new BlockStateNameChange(this, newName);
 
-		modelCreator.getEventDispatcher().fire(event);
+		modelCreator.getGlobalEventDispatcher().fire(event);
 
 		if (event.isCancelled()) return;
 

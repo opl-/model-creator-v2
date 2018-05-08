@@ -41,7 +41,8 @@ public class ResourceManager {
 	 */
 	public ResourceManager() {
 		// XXX: uhh... no. move the string to settings and adding to the list to initializer or something
-		resourcePacks.add(new ZipResourcePack(new File("C:\\Users\\opl\\AppData\\Roaming\\.minecraft\\versions\\1.10.2\\1.10.2.jar")));
+		resourcePacks.add(new ZipResourcePack(new File("C:\\Users\\opl\\AppData\\Roaming\\.minecraft\\versions\\1.12.2\\1.12.2.jar")));
+		resourcePacks.add(new ZipResourcePack(new File("C:\\Users\\opl\\Desktop\\mymodels\\reinhardt\\assets.zip")));
 
 		missingTexture = new MissingTextureResource();
 		addToUpdateList(missingTexture);

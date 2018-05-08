@@ -42,7 +42,7 @@ public class ZipResourcePack implements ResourcePack {
 
 			return zipFile.getInputStream(entry);
 		} catch (ZipException e) {
-			System.out.println(e);
+			e.printStackTrace();
 			return null;
 		} catch (IOException e) {
 			return null;

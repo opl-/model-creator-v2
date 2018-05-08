@@ -13,27 +13,37 @@ import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
 import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.event.WindowClosedEvent;
+import me.opl.apps.modelcreator2.exporter.ExporterManager;
 import me.opl.apps.modelcreator2.importer.ImporterManager;
-import me.opl.apps.modelcreator2.importer.MinecraftBlockModelmporter;
+import me.opl.apps.modelcreator2.importer.MinecraftBlockModelImporter;
+import me.opl.apps.modelcreator2.menu.MenuActionListener;
+import me.opl.apps.modelcreator2.menu.MenuItem;
+import me.opl.apps.modelcreator2.menu.MenuSection;
+import me.opl.apps.modelcreator2.menu.WindowMenuManager;
 import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.BlockModel;
 import me.opl.apps.modelcreator2.model.BlockState;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.CuboidElement;
 import me.opl.apps.modelcreator2.model.Face;
+import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
+import me.opl.apps.modelcreator2.model.Rotation;
 import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.tool.ToolManager;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.ViewportContextInitializer;
 
-// FIXME: textures become black when resizing the panels
+// TODO: replace FloatUtil.isEqual with something that actually uses the epsilon
+// TODO: display matrix previews (1.13 apparently differs from the previous versions)
+// TODO: vertex snapping
 public class ModelCreator implements EventListener {
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.0-SNAPSHOT";
 
 	private static ModelCreator instance;
 
 	private ImporterManager importerManager;
+	private ExporterManager exporterManager;
 
 	/**
 	 * The RenderManager instance for rendering model viewports.
@@ -41,18 +51,36 @@ public class ModelCreator implements EventListener {
 	private RenderManager renderManager = new RenderManager(new ViewportContextInitializer());
 	private Map<BaseModel, ToolManager> toolManagers = new WeakHashMap<>();
 
+	private WindowMenuManager windowMenuManager = new WindowMenuManager();
+
 	private List<ModelWindow> windows = new ArrayList<>();
 
 	private List<BaseModel> models = new ArrayList<>();
 	private List<BlockState> blockStates = new ArrayList<>();
 
-	private EventDispatcher eventDispatcher = new EventDispatcher();
+	private EventDispatcher globalEventDispatcher = new EventDispatcher(null);
+	private WeakHashMap<BaseModel, EventDispatcher> eventDispatchers = new WeakHashMap<>();
 
 	public ModelCreator() {
-		getEventDispatcher().registerListeners(this);
+		getGlobalEventDispatcher().registerListeners(this);
 
 		importerManager = new ImporterManager(this);
-		importerManager.addImporter(new MinecraftBlockModelmporter());
+		importerManager.addImporter(new MinecraftBlockModelImporter());
+
+		exporterManager = new ExporterManager(this);
+
+		MenuSection ms = new MenuSection("File");
+		MenuItem mi = new MenuItem("Exit");
+		mi.addActionListener(new MenuActionListener() {
+			@Override
+			public void onMenuAction(MenuItem menuItem) {
+				System.exit(0);
+			}
+		});
+		ms.addItem(mi);
+		windowMenuManager.addSection(ms);
+		ms = new MenuSection("Tool");
+		windowMenuManager.addSection(ms);
 
 		init();
 	}
@@ -64,9 +92,30 @@ public class ModelCreator implements EventListener {
 		// cube.json
 		BlockModel cubeModel = new BlockModel(instance, null, "cube");
 		cubeModel.setHasElements(true);
-		CuboidElement element = new CuboidElement();
-		//element.getFragment().setFrom(new Position(0, 2, 3));
-		//element.getFragment().setTo(new Position(15, 8, 12));
+		/*for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++) {
+			CuboidElement element = new CuboidElement(new Position(x, y, z), new Position(x + 1, y + 1, z + 1));
+
+			for (Face f : Face.values()) ((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
+
+			cubeModel.addElement(element);
+		}*/
+		/*CuboidElement element = new CuboidElement(cubeModel);
+		element.setRotation(new Rotation().setd(22.5f, 90, 0));
+		element.setCorners(new Position(0, 2, 3), new Position(15, 8, 12));
+		for (Face f : Face.values()) {
+			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
+		}
+		cubeModel.addElement(element);*/
+
+		CuboidElement element = new CuboidElement(cubeModel);
+		element.setCorners(new Position(0, 0, 0), new Position(5, 5, 5));
+		element.setRotation(new Rotation().setd(0, 45, 0));
+		for (Face f : Face.values()) {
+			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
+		}
+		cubeModel.addElement(element);
+		element = new CuboidElement(cubeModel);
+		element.setCorners(new Position(10, 10, 7), new Position(15, 15, 12));
 		for (Face f : Face.values()) {
 			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
 		}
@@ -87,10 +136,14 @@ public class ModelCreator implements EventListener {
 		instance.getRenderManager().getResourceManager().loadTexture(resourceLocation);
 		Texture tex1 = new Texture("all", resourceLocation);
 		model.addTexture(tex1);
-		Texture tex2 = new Texture("west", new ResourceLocation("minecraft:blocks/missingtex"));
-		model.addTexture(tex2);
+		/*Texture tex2 = new Texture("west", new ResourceLocation("minecraft:blocks/missingtex"));
+		model.addTexture(tex2);*/
 
 		instance.addModel(model);
+
+		/*BaseModel hammerModel = new MinecraftBlockModelImporter().open(instance, new ResourceLocation("blocks/hammer"), new FileInputStream(new File("C:\\Users\\opl\\Desktop\\mymodels\\reinhardt\\hammer.json")))[0];
+		instance.addModel(hammerModel);
+		instance.getRenderManager().getResourceManager().loadTexture(new ResourceLocation("Downloads/hammer"));*/
 	}
 
 	private void init() {
@@ -119,14 +172,25 @@ public class ModelCreator implements EventListener {
 		ToolManager toolManager = toolManagers.get(model);
 
 		if (toolManager == null) {
-			toolManager = new ToolManager();
+			toolManager = new ToolManager(model);
 			toolManagers.put(model, toolManager);
 		}
 
 		return toolManager;
 	}
 
-	public EventDispatcher getEventDispatcher() {
+	public EventDispatcher getGlobalEventDispatcher() {
+		return globalEventDispatcher;
+	}
+
+	public EventDispatcher getEventDispatcher(BaseModel model) {
+		EventDispatcher eventDispatcher = eventDispatchers.get(model);
+
+		if (eventDispatcher == null) {
+			eventDispatcher = new EventDispatcher(globalEventDispatcher);
+			eventDispatchers.put(model, eventDispatcher);
+		}
+
 		return eventDispatcher;
 	}
 
@@ -141,7 +205,7 @@ public class ModelCreator implements EventListener {
 	public void addModel(BaseModel model) {
 		models.add(model);
 
-		getEventDispatcher().fire(new ModelOpenedEvent(model));
+		getGlobalEventDispatcher().fire(new ModelOpenedEvent(model));
 	}
 
 	public BaseModel getModelByReference(String reference) {
@@ -179,7 +243,7 @@ public class ModelCreator implements EventListener {
 	public void addBlockState(BlockState blockState) {
 		blockStates.add(blockState);
 
-		getEventDispatcher().fire(new BlockStateOpenedEvent(blockState));
+		getGlobalEventDispatcher().fire(new BlockStateOpenedEvent(blockState));
 	}
 
 	public BlockState getBlockStateByReference(String reference) {
@@ -206,11 +270,19 @@ public class ModelCreator implements EventListener {
 		return blockStates.size();
 	}
 
+	public WindowMenuManager getWindowMenuManager() {
+		return windowMenuManager;
+	}
+
 	@EventHandler
 	public void onWindowClosed(WindowClosedEvent event) {
 		windows.remove(event.getModelWindow());
 
 		if (windows.size() == 0) System.exit(0);
+	}
+
+	public ModelWindow[] getWindows() {
+		return windows.toArray(new ModelWindow[windows.size()]);
 	}
 
 	public ModelWindow createWindow() {

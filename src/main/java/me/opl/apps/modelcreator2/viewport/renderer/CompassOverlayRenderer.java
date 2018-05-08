@@ -52,6 +52,7 @@ public class CompassOverlayRenderer implements Renderer {
 	public void render(GL3 gl) {
 		gl.glEnable(GL3.GL_BLEND);
 
+		// TODO: render this in a corner over everything
 		gl.glBindVertexArray(vao);
 		gl.glDrawArrays(GL3.GL_LINES, 0, 6);
 		gl.glBindVertexArray(0);

@@ -19,7 +19,7 @@ public class CameraTool extends Tool {
 
 		if (event.getType() == PointerEventType.SCROLL) {
 			float distanceFromTarget = vfr.getCameraPosition().distance(vfr.getCameraTarget()) - 0.05f;
-			float zoomDistance = event.getScroll() * 3;
+			float zoomDistance = event.getScroll() * (event.isControlDown() ? 1 : 3);
 
 			if (distanceFromTarget + zoomDistance < 0) zoomDistance = -distanceFromTarget;
 
@@ -30,6 +30,7 @@ public class CameraTool extends Tool {
 		} else if (event.getType() == PointerEventType.DRAG && event.isRightButtonDown() && (event.getChangeX() != 0 || event.getChangeY() != 0)) {
 			boolean isOrtho = vfr.getCameraMode().getView() == View.ORTHO;
 
+			// FIXME: doesnt work properly in ortho free
 			if (event.isShiftDown() || isOrtho) {
 				Ray lastRay = RayHelper.rayFromClick(vfr, event.getLastX(), event.getLastY());
 

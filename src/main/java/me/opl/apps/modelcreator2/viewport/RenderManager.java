@@ -34,6 +34,7 @@ public class RenderManager implements GLEventListener {
 	private ContextInitializer contextInitializer;
 
 	private FramebufferResource currentFramebuffer;
+	private long renderStartTime;
 
 	public RenderManager(ContextInitializer contextInitializer) {
 		this.contextInitializer = contextInitializer;
@@ -100,11 +101,13 @@ public class RenderManager implements GLEventListener {
 		return renderer;
 	}
 
-	// XXX: added synchronize to prevent crashes after computer wakes up. check if it works
-	public synchronized void renderFramebuffer(FramebufferResource framebuffer) {
-		if (this.currentFramebuffer != null) throw new IllegalStateException("Already rendering a framebuffer");
+	public void renderFramebuffer(FramebufferResource framebuffer) {
+		// XXX: added a timeout to prevent infinite crashes after computer wakes up
+		// 500ms timeout on renders
+		if (this.currentFramebuffer != null && renderStartTime + 500 > System.currentTimeMillis()) throw new IllegalStateException("Already rendering a framebuffer");
 
 		this.currentFramebuffer = framebuffer;
+		renderStartTime = System.currentTimeMillis();
 
 		sharedDrawable.display();
 	}

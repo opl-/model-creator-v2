@@ -1,8 +1,6 @@
 package me.opl.apps.modelcreator2.viewport.resource;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.util.Scanner;
 
 import com.jogamp.opengl.GL3;
@@ -30,31 +28,29 @@ public class ShaderResource implements Resource {
 
 	@Override
 	public void prepare(GL3 gl) {
-		Scanner s;
-		try {
-			s = new Scanner(new File(getClass().getResource("/shader/" + this.shaderName + "." + this.extension).toURI()));
-			String shaderCode = s.useDelimiter("\\A").next();
-			s.close();
+		InputStream stream = getClass().getResourceAsStream("/shader/" + this.shaderName + "." + this.extension);
+		if (stream == null) throw new IllegalArgumentException("Shader " + this.shaderName + "." + this.extension + " not found");
 
-			shaderID = gl.glCreateShader(shaderType);
+		Scanner s = new Scanner(stream);
+		String shaderCode = s.useDelimiter("\\A").next();
+		s.close();
 
-			gl.glShaderSource(shaderID, 1, new String[] {shaderCode}, new int[] {shaderCode.length()}, 0);
+		shaderID = gl.glCreateShader(shaderType);
 
-			gl.glCompileShader(shaderID);
+		gl.glShaderSource(shaderID, 1, new String[] {shaderCode}, new int[] {shaderCode.length()}, 0);
 
-			int[] ib = new int[1];
-			gl.glGetShaderiv(shaderID, GL3.GL_COMPILE_STATUS, ib, 0);
+		gl.glCompileShader(shaderID);
 
-			if (ib[0] != 1) {
-				gl.glGetShaderiv(shaderID, GL3.GL_INFO_LOG_LENGTH, ib, 0);
+		int[] ib = new int[1];
+		gl.glGetShaderiv(shaderID, GL3.GL_COMPILE_STATUS, ib, 0);
 
-				byte[] log = new byte[ib[0]];
-				gl.glGetShaderInfoLog(shaderID, ib[0], ib, 0, log, 0);
+		if (ib[0] != 1) {
+			gl.glGetShaderiv(shaderID, GL3.GL_INFO_LOG_LENGTH, ib, 0);
 
-				throw new IllegalStateException(shaderName + "." + extension + ": " + new String(log, 0, ib[0]));
-			}
-		} catch (FileNotFoundException | URISyntaxException e) {
-			throw new IllegalArgumentException("Shader " + this.shaderName + "." + this.extension + " not found", e);
+			byte[] log = new byte[ib[0]];
+			gl.glGetShaderInfoLog(shaderID, ib[0], ib, 0, log, 0);
+
+			throw new IllegalStateException(shaderName + "." + extension + ": " + new String(log, 0, ib[0]));
 		}
 	}
 

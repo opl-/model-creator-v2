@@ -2,17 +2,16 @@ package me.opl.apps.modelcreator2.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.datatransfer.Transferable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
-import javax.swing.TransferHandler;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -47,7 +46,7 @@ public class ModelListPanel extends AbstractPanel {
 
 	private void createPanel(ModelCreator modelCreator) {
 		ModelListTreeModel treeModel = new ModelListTreeModel(modelCreator);
-		modelCreator.getEventDispatcher().registerListeners(treeModel);
+		modelCreator.getGlobalEventDispatcher().registerListeners(treeModel);
 
 		tree = new JTree(treeModel);
 
@@ -193,7 +192,11 @@ public class ModelListPanel extends AbstractPanel {
 				setText(str);
 
 				if (str.equals(ModelListTreeModel.NODE_MODELS)) {
-					setIcon(new ImageIcon(getClass().getResource("/icon/modellist/models.png")));
+					try {
+						setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/icon/modellist/models.png"))));
+					} catch (IOException e) {
+						throw new IllegalStateException("Icon not found", e);
+					}
 				}
 			} else if (value instanceof BaseModel) {
 				BaseModel model = (BaseModel) value;

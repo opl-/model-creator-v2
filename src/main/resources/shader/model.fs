@@ -42,22 +42,26 @@ void main() {
 	color = vec4(1f, 1f, 1f, 0f);
 
 	if ((vTexture & 0x20) != 0) {
+		// has texture
 		color = texture(textureByID(vTexture & 0x1f), vUV);
 
 		if ((vTexture & 0x40) != 0) {
+			// and color
 			color = mix(color, vec4(vColor, 1f), 0.5f);
 		}
 	} else if ((vTexture & 0x40) != 0) {
+		// has color
 		color = vec4(vColor, 1f);
 	}
 
+	// is selected
 	if ((vTexture & 0x80) != 0) {
-		vec3 pos = vPosition + 0.0001f;
+		vec3 pos = vPosition + (time / 10f);
 		pos -= floor(pos);
 
 		float lines = pos.x + pos.y + pos.z;
 
-		float mixRatio = lines < 0.5f || (lines > 1f && lines < 1.5f) ? 0.1f : 0.4f;
+		float mixRatio = mod(lines, 1f) < 0.5f ? 0.1f : 0.4f;
 		mixRatio += 0.05f * sin(time * PI);
 
 		color = mix(color, vec4(1f, 1f, 0f, 1f), mixRatio);

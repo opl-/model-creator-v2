@@ -18,9 +18,18 @@ public abstract class Fragment {
 
 	public abstract FaceData[] getFaces();
 
+	/**
+	 * Returns the {@link Face} the passed {@link FaceData} is on.
+	 *
+	 * @param faceData One of this fragment's {@link FaceData} objects
+	 * @return {@link Face} the {@link FaceData} is on or {@code null} if the
+	 * passed face data doesn't belong to this fragment
+	 */
+	public abstract Face faceDataToFace(FaceData faceData);
+
 	public abstract Renderer createRenderer(RenderManager renderManager, BaseModel model);
 
-	public abstract RayIntersection[] intersect(Ray ray);
+	public abstract RayFaceIntersection[] intersect(Ray ray);
 
 	public long getLastUpdate() {
 		return lastUpdate;

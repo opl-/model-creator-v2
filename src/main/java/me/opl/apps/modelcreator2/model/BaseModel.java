@@ -4,10 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.opl.apps.modelcreator2.ModelCreator;
+import me.opl.apps.modelcreator2.event.ElementsResizedEvent;
+import me.opl.apps.modelcreator2.event.ElementsRotatedEvent;
+import me.opl.apps.modelcreator2.event.EventDispatcher;
+import me.opl.apps.modelcreator2.event.EventHandler;
+import me.opl.apps.modelcreator2.event.EventListener;
 import me.opl.apps.modelcreator2.event.ModelNameChange;
+import me.opl.apps.modelcreator2.event.SelectionChangedEvent;
+import me.opl.apps.modelcreator2.event.SelectionChangedEvent.ChangeType;
 
-public class BaseModel {
+public class BaseModel implements EventListener {
 	private ModelCreator modelCreator;
+	private EventDispatcher eventDispatcher;
 	protected BaseModel parentModel;
 
 	private String name;
@@ -18,10 +26,21 @@ public class BaseModel {
 	private List<FaceData> selectedFaces = new ArrayList<>();
 	private List<Element> selectedElements = new ArrayList<>();
 
+	private Position selectionAABBFrom = new Position();
+	private Position selectionAABBTo = new Position();
+	/**
+	 * Stores the center of the selection AABB. {@code null} if no elements are
+	 * selected.
+	 */
+	private Position selectionCenter = null;
+
 	protected BaseModel(ModelCreator modelCreator, BaseModel parentModel, String name) {
 		this.modelCreator = modelCreator;
 		this.parentModel = parentModel;
 		this.name = name;
+
+		eventDispatcher = modelCreator.getEventDispatcher(this);
+		eventDispatcher.registerListeners(this);
 	}
 
 	/**
@@ -31,6 +50,13 @@ public class BaseModel {
 	 */
 	public BaseModel getParent() {
 		return parentModel;
+	}
+
+	/**
+	 * @return This model's event dispatcher 
+	 */
+	public EventDispatcher getEventDispatcher() {
+		return eventDispatcher;
 	}
 
 	/**
@@ -60,7 +86,7 @@ public class BaseModel {
 
 		ModelNameChange event = new ModelNameChange(this, newName);
 
-		modelCreator.getEventDispatcher().fire(event);
+		modelCreator.getGlobalEventDispatcher().fire(event);
 
 		if (event.isCancelled()) return;
 
@@ -124,7 +150,7 @@ public class BaseModel {
 	 * @throws IllegalArgumentException if the element is {@code null}
 	 */
 	public boolean addElement(Element element) {
-		// TODO: add a method to add elements to a class
+		// TODO: add a method to add elements to a class (added later: what?)
 		if (elements == null) throw new IllegalStateException("Tried to add element to model with no elements");
 		if (element == null) throw new IllegalArgumentException("Element is null");
 		if (elements.contains(element)) return false;
@@ -222,6 +248,14 @@ public class BaseModel {
 	}
 
 	/**
+	 * @return {@code true} if this model has any selected faces, {@code false}
+	 * otherwise
+	 */
+	public boolean hasSelection() {
+		return selectedFaces.size() > 0;
+	}
+
+	/**
 	 * Add the face to the selected faces.
 	 *
 	 * @param face Face to select
@@ -235,10 +269,17 @@ public class BaseModel {
 		if (face == null) throw new IllegalArgumentException("Face is null");
 		if (selectedFaces.contains(face)) return false;
 
-		if (!selectedElements.contains(face.getFragment().getElement())) {
-			selectedElements.add(face.getFragment().getElement());
-			face.getFragment().triggerUpdate();
+		Element element = face.getFragment().getElement();
+
+		if (!selectedElements.contains(element)) {
+			selectedElements.add(element);
+			addToAABB(element);
+			eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.ADDED, new FaceData[] {face}, new Element[] {element}));
+		} else {
+			eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.ADDED, new FaceData[] {face}, new Element[] {}));
 		}
+
+		face.getFragment().triggerUpdate();
 
 		return selectedFaces.add(face);
 	}
@@ -250,6 +291,7 @@ public class BaseModel {
 	 */
 	public FaceData[] selectAllFaces() {
 		ArrayList<FaceData> newlySelectedFaces = new ArrayList<>();
+		ArrayList<Element> newlySelectedElements = new ArrayList<>();
 
 		for (Element e : elements) {
 			for (FaceData f : e.getFaces()) if (selectedFaces.contains(f)) {
@@ -258,12 +300,18 @@ public class BaseModel {
 				f.getFragment().triggerUpdate();
 			}
 
-			if (!selectedElements.contains(e)) selectedElements.add(e);
+			if (!selectedElements.contains(e)) {
+				newlySelectedElements.add(e);
+				selectedElements.add(e);
+				addToAABB(e);
+			}
 		}
 
-		FaceData[] newlySelectedFacesArray = new FaceData[newlySelectedFaces.size()];
-		newlySelectedFaces.toArray(newlySelectedFacesArray);
-		return newlySelectedFacesArray;
+		FaceData[] selectedFaces = newlySelectedFaces.toArray(new FaceData[newlySelectedFaces.size()]);
+
+		eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.ADDED, selectedFaces, newlySelectedElements.toArray(new Element[newlySelectedElements.size()])));
+
+		return selectedFaces;
 	}
 
 	/**
@@ -283,11 +331,19 @@ public class BaseModel {
 			break;
 		}
 
-		if (!foundElement) selectedElements.remove(element);
-
 		boolean removed = selectedFaces.remove(face);
 
-		if (removed) face.getFragment().triggerUpdate();
+		if (removed) {
+			face.getFragment().triggerUpdate();
+
+			if (!foundElement) {
+				selectedElements.remove(element);
+				removeFromAABB(element);
+				eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.REMOVED, new FaceData[] {face}, new Element[] {element}));
+			} else {
+				eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.REMOVED, new FaceData[] {face}, new Element[] {}));
+			}
+		}
 
 		return removed;
 	}
@@ -299,11 +355,16 @@ public class BaseModel {
 	 */
 	public FaceData[] deselectAllFaces() {
 		FaceData[] faces = getSelectedFaces();
-
-		for (FaceData f : faces) f.getFragment().triggerUpdate();
+		Element[] elements = getSelectedElements();
 
 		selectedFaces.clear();
 		selectedElements.clear();
+
+		for (FaceData f : faces) f.getFragment().triggerUpdate();
+
+		eventDispatcher.fire(new SelectionChangedEvent(this, ChangeType.REMOVED, faces, elements));
+
+		removeFromAABB(null);
 
 		return faces;
 	}
@@ -355,6 +416,102 @@ public class BaseModel {
 		if (elements == null) throw new IllegalStateException("Tried to check if face is selected in a model with no elements");
 
 		return selectedFaces.contains(face);
+	}
+
+	/**
+	 * Returns the axis-aligned bounding box of the selected elements in this
+	 * model. The returned array has lowest coordinates at index 0 and highest
+	 * coordinates at index 1.
+	 *
+	 * @return Array containing the AABB of the selected elements or
+	 * {@code null} there's no selection
+	 */
+	public Position[] getSelectionAABB() {
+		if (!hasSelection()) return null;
+		return new Position[] {selectionAABBFrom.clone(), selectionAABBTo.clone()};
+	}
+
+	/**
+	 * Returns the center of the axis-aligned bounding box of the selected
+	 * elements in this model.
+	 *
+	 * @return The center enter point of the AABB of the selected elements or
+	 * {@code null} if no elements are selected
+	 */
+	public Position getSelectionAABBCenter() {
+		if (!hasSelection()) return null;
+		return selectionCenter.clone();
+	}
+
+	/**
+	 * Updates the AABB to include the given element.
+	 *
+	 * @param element Element that should be added to the AABB
+	 */
+	private void addToAABB(Element element) {
+		if (selectionCenter == null) {
+			selectionAABBFrom.set(element.getFrom());
+			selectionAABBTo.set(element.getTo());
+		} else {
+			Position elementFrom = element.getFrom();
+			Position elementTo = element.getTo();
+
+			selectionAABBFrom.set(Math.min(elementFrom.getX(), selectionAABBFrom.getX()), Math.min(elementFrom.getY(), selectionAABBFrom.getY()), Math.min(elementFrom.getZ(), selectionAABBFrom.getZ()));
+			selectionAABBTo.set(Math.max(elementTo.getX(), selectionAABBTo.getX()), Math.max(elementTo.getY(), selectionAABBTo.getY()), Math.max(elementTo.getZ(), selectionAABBTo.getZ()));
+		}
+
+		updateAABBCenter();
+	}
+
+	// TODO: this doesnt consider rotation
+	/**
+	 * Updates the AABB to no longer include the given element. If the element
+	 * is {@code null} the AABB is updated regardless of the elements position.
+	 *
+	 * @param element
+	 */
+	private void removeFromAABB(Element element) {
+		if (selectedElements.size() == 0) {
+			selectionCenter = null;
+			return;
+		}
+
+		if (element != null) {
+			Position elementFrom = element.getFrom();
+			Position elementTo = element.getTo();
+
+			// No need to update if the element was in the AABB instead of on its border
+			if (
+				elementFrom.getX() > selectionAABBFrom.getX() && elementFrom.getY() > selectionAABBFrom.getY() && elementFrom.getZ() > selectionAABBFrom.getZ()
+				&& elementTo.getX() < selectionAABBTo.getX() && elementTo.getY() < selectionAABBTo.getY() && elementTo.getZ() < selectionAABBTo.getZ()
+			) return;
+		}
+
+		selectionAABBFrom.set(selectedElements.get(0).getFrom());
+		selectionAABBTo.set(selectedElements.get(0).getTo());
+
+		for (Element e : selectedElements) {
+			Position elementFrom = e.getFrom();
+			Position elementTo = e.getTo();
+			selectionAABBFrom.set(Math.min(elementFrom.getX(), selectionAABBFrom.getX()), Math.min(elementFrom.getY(), selectionAABBFrom.getY()), Math.min(elementFrom.getZ(), selectionAABBFrom.getZ()));
+			selectionAABBTo.set(Math.max(elementTo.getX(), selectionAABBTo.getX()), Math.max(elementTo.getY(), selectionAABBTo.getY()), Math.max(elementTo.getZ(), selectionAABBTo.getZ()));
+		}
+
+		updateAABBCenter();
+	}
+
+	private void updateAABBCenter() {
+		selectionCenter = selectionAABBTo.clone().subtract(selectionAABBFrom).multiply(0.5f).add(selectionAABBFrom);
+	}
+
+	@EventHandler
+	public void onElementsResized(ElementsResizedEvent event) {
+		removeFromAABB(null);
+	}
+
+	@EventHandler
+	public void onElementsRotated(ElementsRotatedEvent event) {
+		removeFromAABB(null);
 	}
 
 	@Override

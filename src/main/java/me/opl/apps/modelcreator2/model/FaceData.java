@@ -85,4 +85,14 @@ public class FaceData {
 	public UV getUV() {
 		return uv;
 	}
+
+	/**
+	 * @param newUV New UV for this face or {@code null} to unset
+	 * 
+	 */
+	public void setUV(UV newUV) {
+		if (newUV == null) uv = null;
+		else if (uv == null) uv = newUV.clone();
+		else uv.setUV(newUV);
+	}
 }

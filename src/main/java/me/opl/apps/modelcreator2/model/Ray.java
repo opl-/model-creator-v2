@@ -5,8 +5,8 @@ public class Ray {
 	private Position rayPoint;
 
 	public Ray(Position rayStart, Position rayPoint) {
-		this.rayStart = rayStart;
-		this.rayPoint = rayPoint;
+		this.rayStart = rayStart.clone();
+		this.rayPoint = rayPoint.clone();
 	}
 
 	public Position start() {
@@ -17,6 +17,10 @@ public class Ray {
 		return rayPoint.clone();
 	}
 
+	public Position direction() {
+		return rayPoint.clone().subtract(rayStart).normalize();
+	}
+
 	public float distance() {
 		// TODO: cache this?
 		return rayStart.distance(rayPoint);
@@ -25,5 +29,10 @@ public class Ray {
 	@Override
 	public Ray clone() {
 		return new Ray(rayStart.clone(), rayPoint.clone());
+	}
+
+	@Override
+	public String toString() {
+		return "Ray[sx=" + rayStart.getX() + ",sy=" + rayStart.getY() + ",sz=" + rayStart.getZ() + ",px=" + rayPoint.getX() + ",py=" + rayPoint.getY() + ",pz=" + rayPoint.getZ() + "]";
 	}
 }

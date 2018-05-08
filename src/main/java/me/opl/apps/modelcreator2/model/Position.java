@@ -7,6 +7,8 @@ public class Position implements Cloneable {
 	private float y;
 	private float z;
 
+	public Position() {}
+
 	public Position(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
@@ -201,6 +203,20 @@ public class Position implements Cloneable {
 	}
 
 	/**
+	 * Returns squared distance from the given position object.
+	 *
+	 * @param pos Position object to calculate the distance from
+	 * @return Squared distance from the given position object
+	 */
+	public float distanceSq(Position pos) {
+		float dx = x - pos.x;
+		float dy = y - pos.y;
+		float dz = z - pos.z;
+
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	/**
 	 * Returns distance from the given position.
 	 *
 	 * @param x X to calculate distance from
@@ -214,6 +230,40 @@ public class Position implements Cloneable {
 		float dz = this.z - z;
 
 		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+
+	/**
+	 * Returns squared distance from the given position.
+	 *
+	 * @param x X to calculate distance from
+	 * @param y Y to calculate distance from
+	 * @param z Z to calculate distance from
+	 * @return Squared distance from the given position
+	 */
+	public float distanceSq(float x, float y, float z) {
+		float dx = this.x - x;
+		float dy = this.y - y;
+		float dz = this.z - z;
+
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	/**
+	 * Returns the length of this vector.
+	 *
+	 * @return Length of this vector
+	 */
+	public float length() {
+		return (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+	}
+
+	/**
+	 * Returns the length of this vector, squared.
+	 *
+	 * @return Squared length of this vector
+	 */
+	public float lengthSq() {
+		return this.x * this.x + this.y * this.y + this.z * this.z;
 	}
 
 	public float dot(Position pos) {
@@ -230,7 +280,10 @@ public class Position implements Cloneable {
 	 * @return This Position object
 	 */
 	public Position normalize() {
-		float l = distance(0f, 0f, 0f);
+		float l = length();
+
+		if (FloatUtil.isEqual(l, 0)) return this;
+
 		x /= l;
 		y /= l;
 		z /= l;
@@ -245,6 +298,9 @@ public class Position implements Cloneable {
 	 */
 	public Position normalize(Position origin) {
 		float l = distance(origin);
+
+		if (FloatUtil.isEqual(l, 0)) return this;
+
 		x = ((x - origin.getX()) / l) + origin.getX();
 		y = ((y - origin.getY()) / l) + origin.getY();
 		z = ((z - origin.getZ()) / l) + origin.getZ();
@@ -261,10 +317,20 @@ public class Position implements Cloneable {
 	 */
 	public Position normalize(float x, float y, float z) {
 		float l = distance(x, y, z);
+
+		if (FloatUtil.isEqual(l, 0)) return this;
+
 		this.x = ((this.x - x) / l) + x;
 		this.y = ((this.y - y) / l) + y;
 		this.z = ((this.z - z) / l) + z;
 		return this;
+	}
+
+	/**
+	 * @return {@code true} if the vector's length is 0, {@code false} otherwise
+	 */
+	public boolean isZero() {
+		return FloatUtil.isEqual(this.x, 0) && FloatUtil.isEqual(this.y, 0) && FloatUtil.isEqual(this.z, 0);
 	}
 
 	/**

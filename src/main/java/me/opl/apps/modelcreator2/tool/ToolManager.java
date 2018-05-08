@@ -2,7 +2,9 @@ package me.opl.apps.modelcreator2.tool;
 
 import java.util.ArrayList;
 
+import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
+import me.opl.apps.modelcreator2.tool.tool.ElementCreateTool;
 import me.opl.apps.modelcreator2.tool.tool.MoveTool;
 import me.opl.apps.modelcreator2.tool.tool.RotateTool;
 
@@ -11,11 +13,12 @@ public class ToolManager {
 
 	private Tool activeTool;
 
-	public ToolManager() {
-		registerTool(new MoveTool());
-		registerTool(new RotateTool());
+	public ToolManager(BaseModel model) {
+		registerTool(new MoveTool(model));
+		registerTool(new RotateTool(model));
+		registerTool(new ElementCreateTool(model));
 
-		setActiveTool(MoveTool.class);
+		setActiveTool(ElementCreateTool.class);
 		// TODO: make creating tools dynamic
 	}
 
@@ -53,6 +56,7 @@ public class ToolManager {
 	}
 
 	public void firePointerEvent(PointerToolEvent event) {
+		// XXX: dev
 		if (event.getType() != PointerEventType.HOVER && event.getType() != PointerEventType.DRAG) {
 			System.out.println(event.getType() + " " + event.getPressCount());
 			System.out.println(event.isButtonDown(1) + " " + event.isButtonDown(2) + " " + event.isButtonDown(3) + " " + event.isButtonDown(4));

@@ -2,9 +2,11 @@ package me.opl.apps.modelcreator2.event;
 
 import me.opl.apps.modelcreator2.model.BlockState;
 
-public class BlockStateNameChange extends EventCancellable {
+public class BlockStateNameChange extends Event implements EventCancellable {
 	private BlockState blockState;
 	private String newName;
+
+	private boolean cancelled = false;
 
 	public BlockStateNameChange(BlockState blockState, String newName) {
 		this.blockState = blockState;
@@ -21,5 +23,15 @@ public class BlockStateNameChange extends EventCancellable {
 
 	public void setNewName(String newName) {
 		this.newName = newName;
+	}
+
+	@Override
+	public void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return cancelled;
 	}
 }

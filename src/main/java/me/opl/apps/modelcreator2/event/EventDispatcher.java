@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class EventDispatcher {
+	private EventDispatcher parentDispatcher;
 	private Map<Class<? extends Event>, List<RegisteredListener>> eventListeners;
+	private boolean corked;
 
-	public EventDispatcher() {
-		eventListeners = new HashMap<Class<? extends Event>, List<RegisteredListener>>();
+	public EventDispatcher(EventDispatcher parentEventDispatcher) {
+		parentDispatcher = parentEventDispatcher;
+		eventListeners = new HashMap<>();
 	}
 
 	public void registerListeners(EventListener listener) {
@@ -69,6 +72,8 @@ public class EventDispatcher {
 	}
 
 	public void fire(Event event) {
+		if (corked) return;
+
 		Class<? extends Event> eventType = event.getClass();
 		ArrayList<RegisteredListener> toRemove = new ArrayList<>();
 
@@ -91,6 +96,39 @@ public class EventDispatcher {
 			for (RegisteredListener rl : toRemove) e.getValue().remove(rl);
 			toRemove.clear();
 		}
+
+		if (parentDispatcher != null) parentDispatcher.fire(event);
+	}
+
+	/**
+	 * Event dispatchers can be corked to stop them from delivering events to
+	 * registered event listeners. This allows reducing load by firing a single
+	 * bulk event after an operation modifying many elements instead of firing
+	 * them one by one during the operation.
+	 *
+	 * @return {@code true} if this event dispatcher is corked, {@code false}
+	 * otherwise
+	 */
+	public boolean isCorked() {
+		return corked;
+	}
+
+	/**
+	 * Corks this event dispatcher.
+	 *
+	 * @see EventDispatcher#isCorked()
+	 */
+	public void cork() {
+		this.corked = true;
+	}
+
+	/**
+	 * Uncorks this event dispatcher.
+	 *
+	 * @see EventDispatcher#isCorked()
+	 */
+	public void uncork() {
+		this.corked = false;
 	}
 
 	private static class RegisteredListener {

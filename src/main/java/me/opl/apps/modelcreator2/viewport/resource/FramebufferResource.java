@@ -8,7 +8,6 @@ import com.jogamp.opengl.GL3;
 
 import me.opl.apps.modelcreator2.util.GLHelper;
 
-// TODO: can update be called before renders based on isReady instead of calling it in bind?
 // TODO: switching textures of a single FBO is apparently faster than rebinding the FBO (http://www.songho.ca/opengl/gl_fbo.html)
 public class FramebufferResource implements Resource {
 	private FramebufferRenderer renderer;

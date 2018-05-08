@@ -163,19 +163,15 @@ public class RotationHelper {
 		float zc = (float) Math.cos(rotation.getZr());
 		float zs = (float) Math.sin(rotation.getZr());
 
-		// {{1,0,0},{0,cos(x),-sin(x)},{0,sin(x),cos(x)}}*{{cos(y),0,sin(y)},{0,1,0},{-sin(y),0,cos(y)}}*{{cos(z),-sin(z),0},{sin(z),cos(z),0},{0,0,1}}*{i,j,k}
-
-		point.set(
-			point.getX() * yc * zc + point.getZ() * ys - point.getY() * yc * zs,
-			-point.getZ() * yc * xs + point.getX() * (zc * xs * ys + xc * zs) + point.getY() * (xc * zc - xs * ys * zs),
-			point.getZ() * xc * yc + point.getX() * (-xc * zc * ys + xs * zs) + point.getY() * (zc * xs + xc * ys * zs)
-		);
+		point.set(point.getX(), point.getY() * xc + point.getZ() * xs, point.getY() * -xs + point.getZ() * xc);
+		point.set(point.getX() * yc + point.getZ() * -ys, point.getY(), point.getX() * ys + point.getZ() * yc);
+		point.set(point.getX() * zc + point.getY() * zs, point.getX() * -zs + point.getY() * zc, point.getZ());
 
 		return point;
 	}
 
 	public static Position rotate(Position point, Rotation rotation, Position origin) {
-		point.subtract(origin);
+		if (origin != null) point.subtract(origin);
 
 		float xc = (float) Math.cos(rotation.getXr());
 		float xs = (float) Math.sin(rotation.getXr());
@@ -184,14 +180,37 @@ public class RotationHelper {
 		float zc = (float) Math.cos(rotation.getZr());
 		float zs = (float) Math.sin(rotation.getZr());
 
-		point.set(
-			point.getX() * yc * zc + point.getZ() * ys - point.getY() * yc * zs,
-			-point.getZ() * yc * xs + point.getX() * (zc * xs * ys + xc * zs) + point.getY() * (xc * zc - xs * ys * zs),
-			point.getZ() * xc * yc + point.getX() * (-xc * zc * ys + xs * zs) + point.getY() * (zc * xs + xc * ys * zs)
-		);
+		point.set(point.getX(), point.getY() * xc + point.getZ() * xs, point.getY() * -xs + point.getZ() * xc);
+		point.set(point.getX() * yc + point.getZ() * -ys, point.getY(), point.getX() * ys + point.getZ() * yc);
+		point.set(point.getX() * zc + point.getY() * zs, point.getX() * -zs + point.getY() * zc, point.getZ());
 
-		point.add(origin);
+		if (origin != null) point.add(origin);
 
 		return point;
+	}
+
+	public static Rotation rotate(Rotation rotation, Rotation applyRotation) {
+		float xc = (float) Math.cos(applyRotation.getXr());
+		float xs = (float) Math.sin(applyRotation.getXr());
+		float yc = (float) Math.cos(applyRotation.getYr());
+		float ys = (float) Math.sin(applyRotation.getYr());
+		float zc = (float) Math.cos(applyRotation.getZr());
+		float zs = (float) Math.sin(applyRotation.getZr());
+
+		rotation.setr(rotation.getXr(), rotation.getYr() * xc + rotation.getZr() * xs, rotation.getYr() * -xs + rotation.getZr() * xc);
+		rotation.setr(rotation.getXr() * yc + rotation.getZr() * -ys, rotation.getYr(), rotation.getXr() * ys + rotation.getZr() * yc);
+		rotation.setr(rotation.getXr() * zc + rotation.getYr() * zs, rotation.getXr() * -zs + rotation.getYr() * zc, rotation.getZr());
+
+		return rotation;
+	}
+
+	public static Rotation snapRotationToStep(Rotation rotation, float angler) {
+		float halfAngle = angler / 2f;
+
+		return rotation.subtractr(
+			((rotation.getXr() - halfAngle) % angler) + halfAngle,
+			((rotation.getYr() - halfAngle) % angler) + halfAngle,
+			((rotation.getZr() - halfAngle) % angler) + halfAngle
+		);
 	}
 }

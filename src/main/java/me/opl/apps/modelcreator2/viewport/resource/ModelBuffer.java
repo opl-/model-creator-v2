@@ -154,7 +154,7 @@ public class ModelBuffer implements Resource {
 		int offset = SIZE_PER_VERTEX * currentVertex + OFFSET_UV;
 
 		putFloat(offset, x);
-		putFloat(offset + GLHelper.FLOAT_SIZE, y);
+		putFloat(offset + GLHelper.FLOAT_SIZE, 1 - y);
 
 		dirty = true;
 
@@ -165,7 +165,7 @@ public class ModelBuffer implements Resource {
 		int offset = SIZE_PER_VERTEX * currentVertex + OFFSET_UV;
 
 		putFloat(offset, x / (float) textureSize);
-		putFloat(offset + GLHelper.FLOAT_SIZE, y / (float) textureSize);
+		putFloat(offset + GLHelper.FLOAT_SIZE, 1 - (y / (float) textureSize));
 
 		dirty = true;
 

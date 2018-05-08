@@ -14,6 +14,7 @@ import me.opl.libs.tablib.VariableProvider;
 /*
  * == Viewport
  * - edit history length
+ * - constant rendering
  * - Controls
  *   - Rotation sensitivity (x/y)
  *   - invert rotation (x/y)

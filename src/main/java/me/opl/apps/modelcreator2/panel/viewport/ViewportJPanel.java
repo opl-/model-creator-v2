@@ -36,7 +36,7 @@ public class ViewportJPanel extends FramebufferJPanel implements EventListener {
 		viewportFramebufferRenderer = new ViewportFramebufferRenderer(vp.getModelCreator(), cameraMode, renderMode);
 		setFramebufferRenderer(viewportFramebufferRenderer);
 
-		vp.getModelCreator().getEventDispatcher().registerListeners(this);
+		vp.getModelCreator().getGlobalEventDispatcher().registerListeners(this);
 
 		controller = new ViewportController(vp.getModelCreator(), this, viewportFramebufferRenderer);
 

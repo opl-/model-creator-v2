@@ -30,7 +30,7 @@ public class Cuboid extends RotatableFragment {
 		updateCornerCache();
 	}
 
-	private void updateCornerCache() {
+	public void updateCornerCache() {
 		cornerCache[0].set(from.getX(), from.getY(), from.getZ());
 		cornerCache[1].set(to.getX(), from.getY(), from.getZ());
 		cornerCache[2].set(to.getX(), from.getY(), to.getZ());
@@ -50,13 +50,13 @@ public class Cuboid extends RotatableFragment {
 	}
 
 	/**
+	 * Returns an array of corners after rotation of the given face.
+	 *
 	 * @param face Face to get the corners of
-	 * @return Array containing the corners of the given face
+	 * @return Array containing the corners of the given face after rotation
 	 */
 	public Position[] getFaceCorners(Face face) {
-		if (face == Face.DOWN) {
-			return new Position[] {cornerCache[0].clone(), cornerCache[3].clone(), cornerCache[1].clone(), cornerCache[2].clone()};
-		} else if (face == Face.NORTH) {
+		if (face == Face.NORTH) {
 			return new Position[] {cornerCache[1].clone(), cornerCache[7].clone(), cornerCache[0].clone(), cornerCache[4].clone()};
 		} else if (face == Face.EAST) {
 			return new Position[] {cornerCache[2].clone(), cornerCache[6].clone(), cornerCache[1].clone(), cornerCache[7].clone()};
@@ -66,18 +66,38 @@ public class Cuboid extends RotatableFragment {
 			return new Position[] {cornerCache[0].clone(), cornerCache[4].clone(), cornerCache[3].clone(), cornerCache[5].clone()};
 		} else if (face == Face.UP) {
 			return new Position[] {cornerCache[5].clone(), cornerCache[4].clone(), cornerCache[6].clone(), cornerCache[7].clone()};
+		} else if (face == Face.DOWN) {
+			return new Position[] {cornerCache[0].clone(), cornerCache[3].clone(), cornerCache[1].clone(), cornerCache[2].clone()};
 		}
 
 		throw new IllegalArgumentException("Tried to get corners for an invalid face (" + face + ")");
 	}
 
 	/**
-	 * Returns the {@link Face} the passed {@link FaceData} uses.
+	 * Returns an array of corners before rotation of the given face.
 	 *
-	 * @param faceData One of this cuboid's {@link FaceData} objects
-	 * @return {@link Face} the {@link FaceData} uses or {@code null} if the
-	 * passed face data doesn't belong to this cuboid 
+	 * @param face Face to get the corners of
+	 * @return Array containing the corners of the given face before rotation
 	 */
+	public Position[] getFaceCornersNoRotation(Face face) {
+		if (face == Face.NORTH) {
+			return new Position[] {new Position(to.getX(), from.getY(), from.getZ()), new Position(to.getX(), to.getY(), from.getZ()), from.clone(), new Position(from.getX(), to.getY(), from.getZ())};
+		} else if (face == Face.EAST) {
+			return new Position[] {new Position(to.getX(), from.getY(), to.getZ()), to.clone(), new Position(to.getX(), from.getY(), from.getZ()), new Position(to.getX(), to.getY(), from.getZ())};
+		} else if (face == Face.SOUTH) {
+			return new Position[] {new Position(from.getX(), from.getY(), to.getZ()), new Position(from.getX(), to.getY(), to.getZ()), new Position(to.getX(), from.getY(), from.getZ()), to.clone()};
+		} else if (face == Face.WEST) {
+			return new Position[] {from.clone(), new Position(from.getX(), to.getY(), from.getZ()), new Position(from.getX(), from.getY(), to.getZ()), new Position(from.getX(), to.getY(), to.getZ())};
+		} else if (face == Face.UP) {
+			return new Position[] {new Position(from.getX(), to.getY(), to.getZ()), new Position(from.getX(), to.getY(), from.getZ()), to.clone(), new Position(to.getX(), to.getY(), from.getZ())};
+		} else if (face == Face.DOWN) {
+			return new Position[] {from.clone(), new Position(from.getX(), from.getY(), to.getZ()), new Position(to.getX(), from.getY(), from.getZ()), new Position(to.getX(), from.getY(), to.getZ())};
+		}
+
+		throw new IllegalArgumentException("Tried to get corners for an invalid face (" + face + ")");
+	}
+
+	@Override
 	public Face faceDataToFace(FaceData faceData) {
 		for (int i = 0; i < faces.length; i++) if (faces[i] == faceData) return Face.values()[i];
 		return null;
@@ -159,18 +179,18 @@ public class Cuboid extends RotatableFragment {
 	}
 
 	@Override
-	public RayIntersection[] intersect(Ray ray) {
-		ArrayList<RayIntersection> intersections = new ArrayList<>(6);
+	public RayFaceIntersection[] intersect(Ray ray) {
+		ArrayList<RayFaceIntersection> intersections = new ArrayList<>(6);
 
 		for (Face f : Face.values()) {
 			Position[] corners = getFaceCorners(f);
 
 			Position pos = RayHelper.rayQuadIntersection(ray.start(), ray.end(), corners[0], corners[1], corners[2]);
 
-			if (pos != null) intersections.add(new RayIntersection(ray.start(), pos, getFaceData(f)));
+			if (pos != null) intersections.add(new RayFaceIntersection(ray.start(), pos, getFaceData(f)));
 		}
 
-		RayIntersection[] array = new RayIntersection[intersections.size()];
+		RayFaceIntersection[] array = new RayFaceIntersection[intersections.size()];
 		intersections.toArray(array);
 		return array;
 	}

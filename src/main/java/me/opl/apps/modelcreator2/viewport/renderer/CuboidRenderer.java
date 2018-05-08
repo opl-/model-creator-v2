@@ -79,24 +79,26 @@ public class CuboidRenderer implements Renderer {
 		UV uv = faceData.getUV();
 
 		if (uv == null && texture != null) {
+			Position[] cornersNoRotation = cuboid.getFaceCornersNoRotation(face);
+
 			switch (face) {
-			case DOWN:
-				uv = new UV(corners[0].getX(), corners[0].getZ(), corners[3].getX(), corners[3].getZ());
-				break;
 			case NORTH:
-				uv = new UV(16 - corners[0].getX(), corners[0].getY(), 16 - corners[3].getX(), corners[3].getY());
+				uv = new UV(16 - cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getY(), 16 - cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getY());
 				break;
 			case EAST:
-				uv = new UV(16 - corners[0].getZ(), corners[0].getY(), 16 - corners[3].getZ(), corners[3].getY());
+				uv = new UV(16 - cornersNoRotation[0].getZ(), 16 - cornersNoRotation[0].getY(), 16 - cornersNoRotation[3].getZ(), 16 - cornersNoRotation[3].getY());
 				break;
 			case SOUTH:
-				uv = new UV(corners[0].getX(), corners[0].getY(), corners[3].getX(), corners[3].getY());
+				uv = new UV(cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getY(), cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getY());
 				break;
 			case WEST:
-				uv = new UV(corners[0].getZ(), corners[0].getY(), corners[3].getZ(), corners[3].getY());
+				uv = new UV(cornersNoRotation[0].getZ(), 16 - cornersNoRotation[0].getY(), cornersNoRotation[3].getZ(), 16 - cornersNoRotation[3].getY());
 				break;
 			case UP:
-				uv = new UV(corners[0].getX(), 16 - corners[0].getZ(), corners[3].getX(), 16 - corners[3].getZ());
+				uv = new UV(cornersNoRotation[0].getX(), cornersNoRotation[0].getZ(), cornersNoRotation[3].getX(), cornersNoRotation[3].getZ());
+				break;
+			case DOWN:
+				uv = new UV(cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getZ(), cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getZ());
 				break;
 			}
 		}

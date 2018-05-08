@@ -48,7 +48,7 @@ public class Rotation {
 	 * @return This Rotation object for chaining
 	 */
 	public Rotation setXd(float xd) {
-		this.xr = xd * RotationHelper.TO_RADIANS;
+		xr = xd * RotationHelper.TO_RADIANS;
 		return this;
 	}
 
@@ -80,7 +80,7 @@ public class Rotation {
 	 * @return This Rotation object for chaining
 	 */
 	public Rotation setYd(float yd) {
-		this.yr = yd * RotationHelper.TO_RADIANS;
+		yr = yd * RotationHelper.TO_RADIANS;
 		return this;
 	}
 
@@ -112,7 +112,7 @@ public class Rotation {
 	 * @return This Rotation object for chaining
 	 */
 	public Rotation setZd(float zd) {
-		this.zr = zd * RotationHelper.TO_RADIANS;
+		zr = zd * RotationHelper.TO_RADIANS;
 		return this;
 	}
 
@@ -137,9 +137,9 @@ public class Rotation {
 	 * @return This Rotation object for chaining
 	 */
 	public Rotation setd(float xd, float yd, float zd) {
-		this.xr = xd * RotationHelper.TO_RADIANS;
-		this.yr = yd * RotationHelper.TO_RADIANS;
-		this.zr = zd * RotationHelper.TO_RADIANS;
+		xr = xd * RotationHelper.TO_RADIANS;
+		yr = yd * RotationHelper.TO_RADIANS;
+		zr = zd * RotationHelper.TO_RADIANS;
 
 		return this;
 	}
@@ -149,11 +149,95 @@ public class Rotation {
 	 * @return This Rotation object for chaining
 	 */
 	public Rotation set(Rotation newRotation) {
-		this.xr = newRotation.getXr();
-		this.yr = newRotation.getYr();
-		this.zr = newRotation.getZr();
+		xr = newRotation.getXr();
+		yr = newRotation.getYr();
+		zr = newRotation.getZr();
 
 		return this;
+	}
+
+	/**
+	 * @param rotation Rotation to add to this object
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation add(Rotation rotation) {
+		xr += rotation.getXr();
+		yr += rotation.getYr();
+		zr += rotation.getZr();
+
+		return this;
+	}
+
+	/**
+	 * @param xr Angle in radians to add to the X axis
+	 * @param yr Angle in radians to add to the Y axis
+	 * @param zr Angle in radians to add to the Z axis
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation addr(float xr, float yr, float zr) {
+		this.xr += xr;
+		this.yr += yr;
+		this.zr += zr;
+
+		return this;
+	}
+
+	/**
+	 * @param xr Angle in degrees to add to the X axis
+	 * @param yr Angle in degrees to add to the Y axis
+	 * @param zr Angle in degrees to add to the Z axis
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation addd(float xd, float yd, float zd) {
+		xr += xd * RotationHelper.TO_RADIANS;
+		yr += yd * RotationHelper.TO_RADIANS;
+		zr += zd * RotationHelper.TO_RADIANS;
+
+		return this;
+	}
+
+	/**
+	 * @param rotation Rotation to subtract from this object
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation subtract(Rotation rotation) {
+		xr -= rotation.getXr();
+		yr -= rotation.getYr();
+		zr -= rotation.getZr();
+
+		return this;
+	}
+
+	/**
+	 * @param xr Angle in radians to add to the X axis
+	 * @param yr Angle in radians to add to the Y axis
+	 * @param zr Angle in radians to add to the Z axis
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation subtractr(float xr, float yr, float zr) {
+		this.xr -= xr;
+		this.yr -= yr;
+		this.zr -= zr;
+
+		return this;
+	}
+
+	/**
+	 * @param xr Angle in degrees to add to the X axis
+	 * @param yr Angle in degrees to add to the Y axis
+	 * @param zr Angle in degrees to add to the Z axis
+	 * @return This Rotation object for chaining
+	 */
+	public Rotation subtractd(float xd, float yd, float zd) {
+		xr -= xd * RotationHelper.TO_RADIANS;
+		yr -= yd * RotationHelper.TO_RADIANS;
+		zr -= zd * RotationHelper.TO_RADIANS;
+
+		return this;
+	}
+
+	public Rotation inverted() {
+		return new Rotation(-xr, -yr, -zr);
 	}
 
 	@Override
