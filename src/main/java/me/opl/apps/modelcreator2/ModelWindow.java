@@ -11,12 +11,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import me.opl.apps.modelcreator2.event.WindowClosedEvent;
 import me.opl.apps.modelcreator2.event.WindowClosingEvent;
-import me.opl.apps.modelcreator2.menu.MenuItemSeparator;
-import me.opl.apps.modelcreator2.menu.MenuActionListener;
 import me.opl.apps.modelcreator2.menu.MenuItem;
+import me.opl.apps.modelcreator2.menu.MenuItemSeparator;
 import me.opl.apps.modelcreator2.menu.MenuSection;
 import me.opl.libs.tablib.TabLib;
 import me.opl.libs.tablib.Template;
@@ -31,7 +31,7 @@ public class ModelWindow implements WindowListener {
 	private Window window;
 
 	/**
-	 * A window for model. Each model has it's own window that's used to edit
+	 * A window for model. Each model has its own window that's used to edit
 	 * it.
 	 */
 	public ModelWindow(ModelCreator modelCreator) {
@@ -51,10 +51,8 @@ public class ModelWindow implements WindowListener {
 		if (window != null) throw new IllegalStateException("Window already initiated");
 
 		// TODO: get the window from settings/resource file/disk/whatever
-
 		// TODO: add default templates
-		//Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadModelViewPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelViewPanel\"}],\"type\":\"tpc\"}}"));
-		Template template = new Template(tabLib, new JSONObject("{\"orientation\":1,\"bottom\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.PropertiesPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ModelListPanel\"}],\"type\":\"tpc\"},\"divider\":0.7,\"type\":\"splitPane\",\"dialogs\":[],\"templateFor\":\"window\",\"top\":{\"panels\":[{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.ViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.QuadViewportPanel\"},{\"state\":null,\"class\":\"me.opl.apps.modelcreator2.panel.SettingsPanel\"}],\"type\":\"tpc\"}}"));
+		Template template = new Template(tabLib, new JSONObject(new JSONTokener(getClass().getResourceAsStream("/windowlayout/default.json"))));
 
 		window = tabLib.openNewWindow(template);
 
@@ -80,9 +78,7 @@ public class ModelWindow implements WindowListener {
 				jmi.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent event) {
-						for (MenuActionListener mal : mi.getActionListeners()) {
-							mal.onMenuAction(mi);
-						}
+						mi.fireActionEvent();
 					}
 				});
 
@@ -101,6 +97,7 @@ public class ModelWindow implements WindowListener {
 		}
 
 		window.setJMenuBar(menuBar);
+		window.pack();
 	}
 
 	public void closeWindow() {

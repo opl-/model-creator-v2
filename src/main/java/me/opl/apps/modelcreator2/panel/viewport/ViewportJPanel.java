@@ -40,6 +40,7 @@ public class ViewportJPanel extends FramebufferJPanel implements EventListener {
 
 		controller = new ViewportController(vp.getModelCreator(), this, viewportFramebufferRenderer);
 
+		// TODO: make a single global repaint call?
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

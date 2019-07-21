@@ -17,7 +17,7 @@ public class SimpleTextureResource implements TextureResource {
 
 	private int textureID = -1;
 
-	// TODO: add automatic texture reloading
+	// TODO: add automatic texture reloading (listener itself will have to be handled by the resource pack resource, because of things like zip resource packs)
 	// TODO: add a setting to disable automatic texture reloading
 	// TODO: this will have to support in program texture editing at some point - how will that work?
 	public SimpleTextureResource(ResourceManager resourceManager, ResourceLocation location) {

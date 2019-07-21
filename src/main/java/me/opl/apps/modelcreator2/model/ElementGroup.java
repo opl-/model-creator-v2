@@ -3,8 +3,17 @@ package me.opl.apps.modelcreator2.model;
 import java.util.ArrayList;
 
 public class ElementGroup {
+	private String name;
 	private ArrayList<Element> elements = new ArrayList<>();
 	private ArrayList<ElementGroup> elementGroups = new ArrayList<>();
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String newName) {
+		this.name = newName;
+	}
 
 	public Element[] getElements() {
 		Element[] elementArr = new Element[elements.size()];

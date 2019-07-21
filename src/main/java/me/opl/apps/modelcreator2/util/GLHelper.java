@@ -4,10 +4,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.math.FloatUtil;
 
 public class GLHelper {
 	public static final int FLOAT_SIZE = (int) (Float.SIZE / 8);
 	public static final int INTEGER_SIZE = (int) (Integer.SIZE / 8);
+	
+	public static final float[] IDENTITY_MATRIX = FloatUtil.makeIdentity(new float[16]);
 
 	private GLHelper() {}
 

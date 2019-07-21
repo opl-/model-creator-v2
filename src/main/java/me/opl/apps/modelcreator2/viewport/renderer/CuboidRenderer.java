@@ -10,6 +10,7 @@ import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.model.UV;
+import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.resource.ModelBuffer;
 
@@ -162,8 +163,19 @@ public class CuboidRenderer implements Renderer {
 	public void render(GL3 gl) {
 		modelBuffer.bind(gl);
 
+		final int INDICES_PER_FACE = 6;
+
+		int index = 0;
+		for (Face f : Face.values()) {
+			if (cuboid.getFaceData(f).isVisible()) {
+				gl.glDrawElements(GL3.GL_TRIANGLES, INDICES_PER_FACE, GL3.GL_UNSIGNED_INT, GLHelper.INTEGER_SIZE * index * INDICES_PER_FACE);
+			}
+
+			index++;
+		}
+
 		// TODO: shouldnt this be in the ModelBuffer?
-		gl.glDrawElements(GL3.GL_TRIANGLES, modelBuffer.getIndexCount(), GL3.GL_UNSIGNED_INT, 0);
+		// gl.glDrawElements(GL3.GL_TRIANGLES, modelBuffer.getIndexCount(), GL3.GL_UNSIGNED_INT, 0);
 
 		modelBuffer.unbind(gl);
 	}

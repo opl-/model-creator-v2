@@ -107,7 +107,7 @@ public class ElementCreateToolRenderer implements ToolRenderer {
 		gl.glEnable(GL3.GL_BLEND);
 
 		lineBuffer.bind(gl);
-		// lineBuffer.getIndiceCount()
+		// lineBuffer.getIndexCount()
 		if (tool.getCursor() != null) gl.glDrawElements(GL3.GL_LINES, 6, GL3.GL_UNSIGNED_INT, 0);
 		if (tool.getPoint1() != null) gl.glDrawElements(GL3.GL_LINES, 6, GL3.GL_UNSIGNED_INT, GLHelper.INTEGER_SIZE * 6);
 		if (tool.getPoint2() != null) gl.glDrawElements(GL3.GL_LINES, 6, GL3.GL_UNSIGNED_INT, GLHelper.INTEGER_SIZE * 12);

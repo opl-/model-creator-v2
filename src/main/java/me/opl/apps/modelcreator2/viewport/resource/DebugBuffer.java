@@ -60,7 +60,7 @@ public class DebugBuffer extends LineBuffer {
 		gl.glEnable(GL3.GL_BLEND);
 
 		bind(gl);
-		gl.glDrawElements(GL3.GL_LINES, getIndiceCount(), GL3.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL3.GL_LINES, getIndexCount(), GL3.GL_UNSIGNED_INT, 0);
 		unbind(gl);
 
 		gl.glEnable(GL3.GL_DEPTH_TEST);

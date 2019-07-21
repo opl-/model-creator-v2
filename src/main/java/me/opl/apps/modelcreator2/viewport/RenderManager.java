@@ -104,6 +104,7 @@ public class RenderManager implements GLEventListener {
 	public void renderFramebuffer(FramebufferResource framebuffer) {
 		// XXX: added a timeout to prevent infinite crashes after computer wakes up
 		// 500ms timeout on renders
+
 		if (this.currentFramebuffer != null && renderStartTime + 500 > System.currentTimeMillis()) throw new IllegalStateException("Already rendering a framebuffer");
 
 		this.currentFramebuffer = framebuffer;

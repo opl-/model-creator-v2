@@ -20,6 +20,7 @@ public class BaseModel implements EventListener {
 
 	private String name;
 
+	private ElementGroup rootGroup = new ElementGroup();
 	private ArrayList<Element> elements;
 	private ArrayList<Texture> textures = new ArrayList<>();
 

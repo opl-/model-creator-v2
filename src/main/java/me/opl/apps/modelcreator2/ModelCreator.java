@@ -15,11 +15,7 @@ import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.event.WindowClosedEvent;
 import me.opl.apps.modelcreator2.exporter.ExporterManager;
 import me.opl.apps.modelcreator2.importer.ImporterManager;
-import me.opl.apps.modelcreator2.importer.MinecraftBlockModelImporter;
-import me.opl.apps.modelcreator2.menu.MenuActionListener;
-import me.opl.apps.modelcreator2.menu.MenuItem;
-import me.opl.apps.modelcreator2.menu.MenuSection;
-import me.opl.apps.modelcreator2.menu.WindowMenuManager;
+import me.opl.apps.modelcreator2.menu.ContextMenuManager;
 import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.BlockModel;
 import me.opl.apps.modelcreator2.model.BlockState;
@@ -37,6 +33,9 @@ import me.opl.apps.modelcreator2.viewport.ViewportContextInitializer;
 // TODO: replace FloatUtil.isEqual with something that actually uses the epsilon
 // TODO: display matrix previews (1.13 apparently differs from the previous versions)
 // TODO: vertex snapping
+// TODO: look into styling (web L&F looks neat: https://github.com/mgarin/weblaf/tree/styling)
+// TODO: add obj loading support (jogamp utils can read .objs)
+// TODO: switch to jogl helpers? (GLBuffers.bytesPerPixel for type byte sizes, Matrix4, Quaternion)
 public class ModelCreator implements EventListener {
 	public static final String VERSION = "1.0.0-SNAPSHOT";
 
@@ -51,7 +50,7 @@ public class ModelCreator implements EventListener {
 	private RenderManager renderManager = new RenderManager(new ViewportContextInitializer());
 	private Map<BaseModel, ToolManager> toolManagers = new WeakHashMap<>();
 
-	private WindowMenuManager windowMenuManager = new WindowMenuManager();
+	private ContextMenuManager windowMenuManager = ContextMenuManager.createDefaultWindowMenuManager(this);
 
 	private List<ModelWindow> windows = new ArrayList<>();
 
@@ -64,29 +63,16 @@ public class ModelCreator implements EventListener {
 	public ModelCreator() {
 		getGlobalEventDispatcher().registerListeners(this);
 
+		renderManager.getPlaybackState().getEventDispatcher().setParentDipatcher(globalEventDispatcher);
+
 		importerManager = new ImporterManager(this);
-		importerManager.addImporter(new MinecraftBlockModelImporter());
-
 		exporterManager = new ExporterManager(this);
-
-		MenuSection ms = new MenuSection("File");
-		MenuItem mi = new MenuItem("Exit");
-		mi.addActionListener(new MenuActionListener() {
-			@Override
-			public void onMenuAction(MenuItem menuItem) {
-				System.exit(0);
-			}
-		});
-		ms.addItem(mi);
-		windowMenuManager.addSection(ms);
-		ms = new MenuSection("Tool");
-		windowMenuManager.addSection(ms);
 
 		init();
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance = new ModelCreator();
+		instance = ModelCreatorFactory.createModelCreator();
 
 		// XXX: test model
 		// cube.json
@@ -131,7 +117,7 @@ public class ModelCreator implements EventListener {
 		// coal_block.json
 		BlockModel model = new BlockModel(instance, cubeAllModel, "coal_block");
 
-		ResourceLocation resourceLocation = new ResourceLocation("minecraft:blocks/comparator_on");
+		ResourceLocation resourceLocation = new ResourceLocation("minecraft:block/comparator_on");
 		// TODO: do this load call elsewhere
 		instance.getRenderManager().getResourceManager().loadTexture(resourceLocation);
 		Texture tex1 = new Texture("all", resourceLocation);
@@ -160,13 +146,25 @@ public class ModelCreator implements EventListener {
 	}
 
 	/**
+	 * Returns tool managers for every model.
+	 *
+	 * @return All tool managers
+	 */
+	public ToolManager[] getToolManagers() {
+		return toolManagers.values().toArray(new ToolManager[toolManagers.size()]);
+	}
+
+	/**
 	 * Returns a tool manager for the provided model.
 	 *
 	 * @param model Model with elements
 	 * @return The {@link ToolManager} instance for the given model
+	 * @throws NullPointerException if the passed model is {@code null}
 	 * @throws IllegalArgumentException if the model doesn't have elements
 	 */
 	public ToolManager getToolManager(BaseModel model) {
+		if (model == null) return null;
+
 		if (!model.hasElements()) throw new IllegalArgumentException("Tried to get a tool manager for a model with no elements");
 
 		ToolManager toolManager = toolManagers.get(model);
@@ -270,7 +268,7 @@ public class ModelCreator implements EventListener {
 		return blockStates.size();
 	}
 
-	public WindowMenuManager getWindowMenuManager() {
+	public ContextMenuManager getWindowMenuManager() {
 		return windowMenuManager;
 	}
 
@@ -291,5 +289,13 @@ public class ModelCreator implements EventListener {
 		windows.add(win);
 
 		return win;
+	}
+
+	public ImporterManager getImporterManager() {
+		return importerManager;
+	}
+
+	public ExporterManager getExporterManager() {
+		return exporterManager;
 	}
 }

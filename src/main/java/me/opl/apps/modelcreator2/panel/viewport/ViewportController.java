@@ -2,6 +2,8 @@ package me.opl.apps.modelcreator2.panel.viewport;
 
 import java.awt.Font;
 import java.awt.MouseInfo;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -9,7 +11,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.font.FontRenderContext;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JPopupMenu;
 
 import me.opl.apps.modelcreator2.ModelCreator;
 import me.opl.apps.modelcreator2.model.BaseModel;
@@ -21,6 +26,8 @@ import me.opl.apps.modelcreator2.tool.tool.ElementCreateTool;
 import me.opl.apps.modelcreator2.tool.tool.MoveTool;
 import me.opl.apps.modelcreator2.tool.tool.RotateTool;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer;
+import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.CameraMode;
+import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.RenderMode;
 
 public class ViewportController implements MouseListener, MouseMotionListener, MouseWheelListener {
 	private static final Font FONT = new JLabel().getFont();
@@ -30,6 +37,9 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	private ViewportJPanel view;
 	private ViewportFramebufferRenderer vfr;
+
+	private JPopupMenu popupMenu;
+	private JMenu modelListMenu;
 
 	private boolean[] dragState = new boolean[16];
 	private int lastMouseX;
@@ -47,6 +57,63 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 		view.addMouseWheelListener(this);
 	}
 
+	private void createPopupMenu() {
+		popupMenu = new JPopupMenu();
+
+		for (final CameraMode cm : CameraMode.values()) {
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(cm.getDisplayName(), cm == view.getViewportFramebufferRenderer().getCameraMode());
+
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					view.getViewportFramebufferRenderer().setCameraMode(cm);
+				}
+			});
+
+			popupMenu.add(item);
+		}
+
+		popupMenu.addSeparator();
+
+		for (final RenderMode rm : RenderMode.values()) {
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(rm.getDisplayName(), rm == view.getViewportFramebufferRenderer().getRenderMode());
+
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					view.getViewportFramebufferRenderer().setRenderMode(rm);
+				}
+			});
+
+			popupMenu.add(item);
+		}
+
+		popupMenu.addSeparator();
+
+		modelListMenu = new JMenu("Display model");
+
+		for (final BaseModel m : modelCreator.getModels()) {
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(m.getName(), m == getModel());
+
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setModel(m);
+				}
+			});
+
+			modelListMenu.add(item);
+		}
+
+		popupMenu.add(modelListMenu);
+	}
+
+	private void showPopupMenu() {
+		createPopupMenu();
+
+		popupMenu.show(view, 0, 17);
+	}
+
 	public BaseModel getModel() {
 		return view.getViewportFramebufferRenderer().getDisplayedModel();
 	}
@@ -61,12 +128,20 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		BaseModel model = vfr.getEditedModel();
+		ToolManager tm = model == null ? null : modelCreator.getToolManager(model);
+
 		for (int i = 1; i < Math.min(16, MouseInfo.getNumberOfButtons()); i++) if (!dragState[i - 1] && (e.getModifiersEx() & MouseEvent.getMaskForButton(i)) != 0) {
 			dragState[i - 1] = true;
-			modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG_START, i, getButtonStatesFromEvent(e), lastPressCount, e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+
+			if (tm != null) {
+				tm.firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG_START, i, getButtonStatesFromEvent(e), lastPressCount, e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+			}
 		}
 
-		modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG, e.getButton(), getButtonStatesFromEvent(e), lastPressCount, e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		if (tm != null) {
+			tm.firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG, e.getButton(), getButtonStatesFromEvent(e), lastPressCount, e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		}
 
 		lastMouseX = e.getX();
 		lastMouseY = e.getY();
@@ -74,7 +149,11 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.HOVER, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		BaseModel model = vfr.getEditedModel();
+
+		if (model != null) {
+			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.HOVER, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		}
 
 		lastMouseX = e.getX();
 		lastMouseY = e.getY();
@@ -82,23 +161,39 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (e.getX() < 20 && e.getY() < 20) {
-			ToolManager tm = modelCreator.getToolManager(getModel().getModelWithElements());
-			Class<? extends Tool> activeTool = tm.getActiveTool().getClass();
+		BaseModel model = vfr.getEditedModel();
 
-			if (activeTool == ElementCreateTool.class) tm.setActiveTool(RotateTool.class);
-			else if (activeTool == RotateTool.class) tm.setActiveTool(MoveTool.class);
-			else if (activeTool == MoveTool.class) tm.setActiveTool(ElementCreateTool.class);
+		// XXX: dev tool switcher (that i totally didn't forget about)
+		if (e.getX() < 20 && e.getY() < 20) {
+			if (model != null) {
+				ToolManager tm = modelCreator.getToolManager(getModel().getModelWithElements());
+				Class<? extends Tool> activeTool = tm.getActiveTool().getClass();
+
+				if (activeTool == ElementCreateTool.class) tm.setActiveTool(RotateTool.class);
+				else if (activeTool == RotateTool.class) tm.setActiveTool(MoveTool.class);
+				else if (activeTool == MoveTool.class) tm.setActiveTool(ElementCreateTool.class);
+			}
 		} else {
 			System.out.println("click   " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()) + " " + e.getClickCount());
-			modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.CLICK, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+			if (model != null) {
+				modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.CLICK, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+			}
 		}
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		System.out.println("press   " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()));
-		modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DOWN, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+
+		if (e.getX() > 0 && e.getY() > 0 && e.getY() < 17 && e.getX() < FONT.getStringBounds(view.getViewportFramebufferRenderer().getCameraMode().getDisplayName() + " \u25be", FONT_RENDER_CONTEXT).getWidth() + 4) {
+			showPopupMenu();
+		}
+
+		BaseModel model = vfr.getEditedModel();
+
+		if (model != null) {
+			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DOWN, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		}
 
 		lastPressCount = e.getClickCount();
 	}
@@ -106,19 +201,29 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		System.out.println("release " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()) + " " + e.getButton());
+		BaseModel model = vfr.getEditedModel();
 
 		if (e.getButton() > 0 && e.getButton() <= 16 && dragState[e.getButton() - 1]) {
-			modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG_END, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+			if (model != null) {
+				modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DRAG_END, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+			}
+
 			dragState[e.getButton() - 1] = false;
 		}
 
-		modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.UP, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		if (model != null) {
+			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.UP, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		}
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		System.out.println("scroll  " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()));
-		modelCreator.getToolManager(vfr.getEditedModel()).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.SCROLL, MouseEvent.BUTTON2, getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, (float) e.getPreciseWheelRotation(), e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		BaseModel model = vfr.getEditedModel();
+
+		if (model != null) {
+			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.SCROLL, MouseEvent.BUTTON2, getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, (float) e.getPreciseWheelRotation(), e.isControlDown(), e.isShiftDown(), e.isAltDown()));
+		}
 	}
 
 	@Override public void mouseEntered(MouseEvent e) {}

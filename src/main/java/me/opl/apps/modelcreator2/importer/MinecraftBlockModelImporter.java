@@ -9,7 +9,6 @@ import org.json.JSONTokener;
 
 import me.opl.apps.modelcreator2.ModelCreator;
 import me.opl.apps.modelcreator2.model.Axis;
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.BlockModel;
 import me.opl.apps.modelcreator2.model.CuboidElement;
 import me.opl.apps.modelcreator2.model.Face;
@@ -23,14 +22,14 @@ import me.opl.apps.modelcreator2.model.UV;
 // TODO: differentiate between block and item models. somehow
 // TODO: load parent models
 // TODO: create an exception or result object to give users feedback on why the loading failed or if any problems were found with the model. could also use it to tell what else needs to be loaded
-public class MinecraftBlockModelImporter implements ModelImporter {
+public class MinecraftBlockModelImporter implements Importer {
 	@Override
-	public BaseModel[] open(ModelCreator modelCreator, ResourceLocation resourceLocation, InputStream stream) {
+	public boolean open(ModelCreator modelCreator, ResourceLocation resourceLocation, InputStream stream) {
 		JSONObject json;
 		try {
 			json = new JSONObject(new JSONTokener(stream));
 		} catch (JSONException e) {
-			return null;
+			return false;
 		}
 
 		BlockModel model = new BlockModel(modelCreator, null, resourceLocation.getPath());
@@ -43,10 +42,11 @@ public class MinecraftBlockModelImporter implements ModelImporter {
 			createElements(json, model);
 		} catch (JSONException e) {
 			e.printStackTrace();
-			return null;
+			return false;
 		}
 
-		return new BaseModel[] {model};
+		modelCreator.addModel(model);
+		return true;
 	}
 
 	private void createTextures(JSONObject json, BlockModel model) {

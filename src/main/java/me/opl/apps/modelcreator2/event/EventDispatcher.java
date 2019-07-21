@@ -131,6 +131,28 @@ public class EventDispatcher {
 		this.corked = false;
 	}
 
+	/**
+	 * Changes this EventDispatcher's parent dispatcher.
+	 *
+	 * @param parentDispatcher The new {@link EventDispatcher}
+	 * @see EventDispatcher#getParentDispatcher()
+	 */
+	public void setParentDipatcher(EventDispatcher parentDispatcher) {
+		this.parentDispatcher = parentDispatcher;
+	}
+
+	/**
+	 * Parent dispatcher is an EventDispatcher that all events from this
+	 * EventDispatcher are forwarded to after triggering all listeners. If
+	 * this dispatcher is corked, the parent dispatcher will not receive the
+	 * event.
+	 *
+	 * @return This EventDispatcher's parent {@link EventDispatcher}
+	 */
+	public EventDispatcher getParentDispatcher() {
+		return parentDispatcher;
+	}
+
 	private static class RegisteredListener {
 		private WeakReference<EventListener> listener;
 		private Method method;

@@ -1,5 +1,8 @@
 package me.opl.apps.modelcreator2.viewport.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.jogamp.opengl.GL3;
 
 public class ShaderProgramResource implements Resource {
@@ -8,6 +11,8 @@ public class ShaderProgramResource implements Resource {
 	private ShaderResource[] shaders;
 
 	private int shaderProgramID;
+
+	private Map<String, Integer> uniformLocations = new HashMap<>();
 
 	// TODO: improve readiness checks
 	public ShaderProgramResource(String shaderName, int[] shaderTypes) {
@@ -42,6 +47,25 @@ public class ShaderProgramResource implements Resource {
 
 	public String getShaderName() {
 		return shaderName;
+	}
+
+	/**
+	 * Used to retrieve uniform locations with cache. 
+	 *
+	 * @param gl GL3 instance
+	 * @param uniformName Name of the uniform in this program
+	 * @return -1 if uniform doesn't exist or the location couldn't be
+	 * retrieved, uniform location otherwise
+	 */
+	public int getUniformLocation(GL3 gl, String uniformName) {
+		Integer cached = uniformLocations.get(uniformName);
+		if (cached != null) return cached;
+
+		int uniformLocation = gl.glGetUniformLocation(shaderProgramID, uniformName);
+
+		if (uniformLocation != -1) uniformLocations.put(uniformName, uniformLocation);
+
+		return uniformLocation;
 	}
 
 	public int glID() {

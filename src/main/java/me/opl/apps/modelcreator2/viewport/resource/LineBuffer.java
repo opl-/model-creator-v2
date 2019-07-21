@@ -38,7 +38,7 @@ public class LineBuffer implements Resource {
 		indices = GLHelper.createByteBuffer(points * 2 * GLHelper.INTEGER_SIZE);
 	}
 
-	public int getIndiceCount() {
+	public int getIndexCount() {
 		return indexCount;
 	}
 
@@ -76,7 +76,7 @@ public class LineBuffer implements Resource {
 	}
 
 	public LineBuffer lineTo(float x, float y, float z) {
-		if (position == -1) throw new IllegalStateException("Called lineTo on first segment");
+		if (position == -1) throw new IllegalStateException("Called lineTo on first point");
 
 		position++;
 		int offset = position * SIZE_PER_VERTEX + OFFSET_POSITION;
@@ -190,8 +190,8 @@ public class LineBuffer implements Resource {
 
 	@Override
 	public void destroy(GL3 gl) {
-		if (vao != -1) gl.glDeleteVertexArrays(1, new int[] {vao}, 0);
-		if (vbo != -1 || ebo != -1) gl.glDeleteBuffers(2, new int[] {vbo, ebo}, 0);
+		if (vao != -1) gl.glDeleteVertexArrays(1, new int[] { vao }, 0);
+		if (vbo != -1 || ebo != -1) gl.glDeleteBuffers(2, new int[] { vbo, ebo }, 0);
 		vao = vbo = ebo = -1;
 	}
 }

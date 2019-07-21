@@ -1,0 +1,42 @@
+{
+	"orientation": 1,
+	"divider": 0.7,
+	"type": "splitPane",
+	"dialogs": [],
+	"templateFor": "window",
+	"top": {
+		"type": "tpc",
+		"panels": [{
+			"state": null,
+			"class": "me.opl.apps.modelcreator2.panel.ViewportPanel"
+		}, {
+			"state": null,
+			"class": "me.opl.apps.modelcreator2.panel.QuadViewportPanel"
+		}, {
+			"state": null,
+			"class": "me.opl.apps.modelcreator2.panel.SettingsPanel"
+		}]
+	},
+	"bottom": {
+		"type": "splitPane",
+		"orientation": 0,
+		"divider": 0.8,
+		"top": {
+			"type": "tpc",
+			"panels": [{
+				"state": null,
+				"class": "me.opl.apps.modelcreator2.panel.PropertiesPanel"
+			}, {
+				"state": null,
+				"class": "me.opl.apps.modelcreator2.panel.ModelListPanel"
+			}]
+		},
+		"bottom": {
+			"type": "tpc",
+			"panels": [{
+				"state": null,
+				"class": "me.opl.apps.modelcreator2.panel.FrameCounterPanel"
+			}]
+		}
+	}
+}

@@ -23,9 +23,9 @@ public class QuadViewportPanel extends AbstractPanel {
 		super(vp);
 
 		viewportComponents = new ViewportJPanel[] {
-			new ViewportJPanel(vp, CameraMode.ORTHO_WEST, RenderMode.MODEL),
-			new ViewportJPanel(vp, CameraMode.ORTHO_UP, RenderMode.MODEL),
-			new ViewportJPanel(vp, CameraMode.ORTHO_SOUTH, RenderMode.MODEL),
+			new ViewportJPanel(vp, CameraMode.ORTHO_WEST, RenderMode.TEXTURED),
+			new ViewportJPanel(vp, CameraMode.ORTHO_UP, RenderMode.TEXTURED),
+			new ViewportJPanel(vp, CameraMode.ORTHO_SOUTH, RenderMode.TEXTURED),
 			new ViewportJPanel(vp, CameraMode.PERSPECTIVE_FREE, RenderMode.TEXTURED)
 		};
 

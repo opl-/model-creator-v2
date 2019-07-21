@@ -9,6 +9,7 @@ import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
 import me.opl.apps.modelcreator2.model.Fragment;
 import me.opl.apps.modelcreator2.model.Position;
+import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.util.RotationHelper;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.CameraMode.View;
 import me.opl.apps.modelcreator2.viewport.renderer.BoundaryRenderer;
@@ -102,10 +103,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		float[] projectionView = new float[16];
 		FloatUtil.multMatrix(viewProjectionMatrix, 16, viewProjectionMatrix, 0, projectionView, 0);
 
-		float[] identityMatrix = new float[16];
-		FloatUtil.makeIdentity(identityMatrix);
-
-		ToolRenderer toolRenderer = renderManager.getToolRenderer(modelCreator.getToolManager(model.getModelWithElements()).getActiveTool());
+		ToolRenderer toolRenderer = model == null ? null : renderManager.getToolRenderer(modelCreator.getToolManager(model.getModelWithElements()).getActiveTool());
 
 		if (toolRenderer != null) {
 			if (!toolRenderer.isInitialized()) toolRenderer.prepare(gl);
@@ -114,17 +112,19 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 
 		modelShader.bind(gl);
 
-		// TODO: cache uniform locations
-		int modelUniform = gl.glGetUniformLocation(modelShader.glID(), "modelMatrix");
-		gl.glUniformMatrix4fv(modelUniform, 1, false, identityMatrix, 0);
+		int modelUniform = modelShader.getUniformLocation(gl, "modelMatrix");
+		gl.glUniformMatrix4fv(modelUniform, 1, false, GLHelper.IDENTITY_MATRIX, 0);
 
-		int projectionUniform = gl.glGetUniformLocation(modelShader.glID(), "viewProjectionMatrix");
+		int projectionUniform = modelShader.getUniformLocation(gl, "viewProjectionMatrix");
 		gl.glUniformMatrix4fv(projectionUniform, 1, false, projectionView, 0);
 
-		int timeUniform = gl.glGetUniformLocation(modelShader.glID(), "time");
+		int timeUniform = modelShader.getUniformLocation(gl, "time");
 		gl.glUniform1f(timeUniform, (System.currentTimeMillis() - startTime) / 1000f);
 
-		int texturesUniform = gl.glGetUniformLocation(modelShader.glID(), "textures");
+		int frameUniform = modelShader.getUniformLocation(gl, "frame");
+		gl.glUniform1f(frameUniform, renderManager.getPlaybackState().getCurrentFrame());
+
+		int texturesUniform = modelShader.getUniformLocation(gl, "textures");
 		gl.glUniform1iv(texturesUniform, 16, new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, 0);
 
 		if (toolRenderer != null) toolRenderer.renderBeforeModel(gl);
@@ -148,19 +148,19 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 
 		lineShader.bind(gl);
 
-		modelUniform = gl.glGetUniformLocation(lineShader.glID(), "modelMatrix");
-		gl.glUniformMatrix4fv(modelUniform, 1, false, identityMatrix, 0);
+		modelUniform = lineShader.getUniformLocation(gl, "modelMatrix");
+		gl.glUniformMatrix4fv(modelUniform, 1, false, GLHelper.IDENTITY_MATRIX, 0);
 
-		projectionUniform = gl.glGetUniformLocation(lineShader.glID(), "viewProjectionMatrix");
+		projectionUniform = lineShader.getUniformLocation(gl, "viewProjectionMatrix");
 		gl.glUniformMatrix4fv(projectionUniform, 1, false, projectionView, 0);
 
-		int cameraDirectionUniform = gl.glGetUniformLocation(lineShader.glID(), "cameraDirection");
+		int cameraDirectionUniform = lineShader.getUniformLocation(gl, "cameraDirection");
 		gl.glUniform3fv(cameraDirectionUniform, 1, getCameraDirection().toArray(), 0);
 
-		int cameraPositionUniform = gl.glGetUniformLocation(lineShader.glID(), "cameraPosition");
+		int cameraPositionUniform = lineShader.getUniformLocation(gl, "cameraPosition");
 		gl.glUniform3fv(cameraPositionUniform, 1, getCameraPosition().toArray(), 0);
 
-		int constantWidthUniform = gl.glGetUniformLocation(lineShader.glID(), "constantWidth");
+		int constantWidthUniform = lineShader.getUniformLocation(gl, "constantWidth");
 		gl.glUniform1i(constantWidthUniform, 1);
 
 		// TODO: switch to multisampling?
@@ -261,7 +261,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 	/**
 	 * Shorthand for {@link BaseModel#getModelWithElements()}.
 	 *
-	 * @return Model which holds the elements
+	 * @return Model which holds the elements or {@code null} if none
 	 */
 	public BaseModel getEditedModel() {
 		return model == null ? null : model.getModelWithElements();

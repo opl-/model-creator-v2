@@ -4,6 +4,7 @@
 
 uniform sampler2D[] textures;
 uniform float time;
+uniform int frame;
 
 in vec3 vPosition;
 /*
@@ -19,23 +20,23 @@ in vec3 vColor;
 
 out vec4 color;
 
-sampler2D textureByID(int id) {
-	if (id == 0) return textures[0];
-	else if (id == 1) return textures[1];
-	else if (id == 2) return textures[2];
-	else if (id == 3) return textures[3];
-	else if (id == 4) return textures[4];
-	else if (id == 5) return textures[5];
-	else if (id == 6) return textures[6];
-	else if (id == 7) return textures[7];
-	else if (id == 8) return textures[8];
-	else if (id == 9) return textures[9];
-	else if (id == 10) return textures[10];
-	else if (id == 11) return textures[11];
-	else if (id == 12) return textures[12];
-	else if (id == 13) return textures[13];
-	else if (id == 14) return textures[14];
-	else if (id == 15) return textures[15];
+vec4 colorByTextureID(int id, vec2 uv) {
+	if (id == 0) return texture(textures[0], uv);
+	else if (id == 1) return texture(textures[1], uv);
+	else if (id == 2) return texture(textures[2], uv);
+	else if (id == 3) return texture(textures[3], uv);
+	else if (id == 4) return texture(textures[4], uv);
+	else if (id == 5) return texture(textures[5], uv);
+	else if (id == 6) return texture(textures[6], uv);
+	else if (id == 7) return texture(textures[7], uv);
+	else if (id == 8) return texture(textures[8], uv);
+	else if (id == 9) return texture(textures[9], uv);
+	else if (id == 10) return texture(textures[10], uv);
+	else if (id == 11) return texture(textures[11], uv);
+	else if (id == 12) return texture(textures[12], uv);
+	else if (id == 13) return texture(textures[13], uv);
+	else if (id == 14) return texture(textures[14], uv);
+	else if (id == 15) return texture(textures[15], uv);
 }
 
 void main() {
@@ -43,7 +44,7 @@ void main() {
 
 	if ((vTexture & 0x20) != 0) {
 		// has texture
-		color = texture(textureByID(vTexture & 0x1f), vUV);
+		color = colorByTextureID(vTexture & 0x1f, vUV);
 
 		if ((vTexture & 0x40) != 0) {
 			// and color

@@ -5,38 +5,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.event.ImporterRegisteringEvent;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 
 public class ImporterManager {
 	private ModelCreator modelCreator;
 
-	private List<ModelImporter> importers = new ArrayList<>();
+	private List<Importer> importers = new ArrayList<>();
 
 	public ImporterManager(ModelCreator modelCreator) {
 		this.modelCreator = modelCreator;
 	}
 
-	public boolean addImporter(ModelImporter modelImporter) {
-		return importers.add(modelImporter);
+	public boolean addImporter(Importer importer) {
+		ImporterRegisteringEvent event = new ImporterRegisteringEvent(importer);
+		modelCreator.getGlobalEventDispatcher().fire(event);
+
+		if (event.isCancelled()) return false;
+
+		return importers.add(importer);
 	}
 
 	// FIXME: what about blockstates?
-	public BaseModel[] openFile(ResourceLocation resourceLocation) {
-		for (ModelImporter mi : importers) {
+	// TODO: should opening stand-alone files be possible too?
+	public void openFiles(ResourceLocation resourceLocation) {
+		for (Importer importer : importers) {
 			try {
 				InputStream inputStream = modelCreator.getRenderManager().getResourceManager().getResourceInputStream(resourceLocation);
 
-				BaseModel[] models = mi.open(modelCreator, resourceLocation, inputStream);
+				importer.open(modelCreator, resourceLocation, inputStream);
 
 				inputStream.close();
-
-				if (models != null && models.length > 0) return models;
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Exception thrown opening resource " + resourceLocation + " with " + mi.getClass().getSimpleName(), e);
+				throw new IllegalArgumentException("Exception thrown opening resource " + resourceLocation + " with " + importer.getClass().getSimpleName(), e);
 			}
 		}
-
-		return null;
 	}
 }

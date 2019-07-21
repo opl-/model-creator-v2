@@ -10,7 +10,7 @@ public class FaceData {
 	private Face cullFace;
 	private Texture texture;
 	private UV uv;
-	private float textureRotation;
+	private int textureRotation;
 	private int tintIndex = -1;
 
 	/**
@@ -94,5 +94,29 @@ public class FaceData {
 		if (newUV == null) uv = null;
 		else if (uv == null) uv = newUV.clone();
 		else uv.setUV(newUV);
+	}
+
+	// TODO: is the rotation CW or CCW? mention it in the docs
+	/**
+	 * Returns the texture rotation.
+	 *
+	 * @return Texture rotation; one of {@code [0, 90, 180, 270]}
+	 */
+	public int getTextureRotation() {
+		return textureRotation;
+	}
+
+	/**
+	 * Sets the texture rotation.
+	 *
+	 * @param textureRotation New texture rotation. Has to be one of
+	 * {@code [0, 90, 180, 270]}.
+	 */
+	public void setTextureRotation(int textureRotation) {
+		if (textureRotation != 0 && textureRotation != 90 && textureRotation != 180 && textureRotation != 270) {
+			throw new IllegalArgumentException("Invalid textureRotation: " + textureRotation);
+		}
+
+		this.textureRotation = textureRotation;
 	}
 }

@@ -25,4 +25,10 @@ public class MenuItem {
 	public MenuActionListener[] getActionListeners() {
 		return actionListeners.toArray(new MenuActionListener[actionListeners.size()]);
 	}
+
+	public void fireActionEvent() {
+		for (MenuActionListener mal : actionListeners) {
+			mal.onMenuAction(this);
+		}
+	}
 }

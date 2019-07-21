@@ -100,7 +100,7 @@ public class RotateToolRenderer implements ToolRenderer {
 		gl.glEnable(GL3.GL_BLEND);
 
 		lineBuffer.bind(gl);
-		gl.glDrawElements(GL3.GL_LINES, lineBuffer.getIndiceCount(), GL3.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL3.GL_LINES, lineBuffer.getIndexCount(), GL3.GL_UNSIGNED_INT, 0);
 		lineBuffer.unbind(gl);
 
 		gl.glEnable(GL3.GL_DEPTH_TEST);

@@ -18,20 +18,23 @@ public class CameraTool extends Tool {
 		ViewportFramebufferRenderer vfr = event.getFramebufferRenderer();
 
 		if (event.getType() == PointerEventType.SCROLL) {
+			boolean isOrtho = vfr.getCameraMode().getView() == View.ORTHO;
+
 			float distanceFromTarget = vfr.getCameraPosition().distance(vfr.getCameraTarget()) - 0.05f;
 			float zoomDistance = event.getScroll() * (event.isControlDown() ? 1 : 3);
 
 			if (distanceFromTarget + zoomDistance < 0) zoomDistance = -distanceFromTarget;
 
-			Position positionChange = vfr.getCameraPosition().clone().subtract(vfr.getCameraTarget()).normalize().multiply(zoomDistance);
+			// Position positionChange = vfr.getCameraPosition().clone().subtract(vfr.getCameraTarget()).normalize().multiply(zoomDistance);
+			Position positionChange = vfr.getCameraDirection().multiply(-zoomDistance);
 
+			// FIXME: camera bounces in ortho when zooming in too far
 			vfr.getCameraPosition().add(positionChange);
 			if (event.isShiftDown()) vfr.getCameraTarget().add(positionChange);
 		} else if (event.getType() == PointerEventType.DRAG && event.isRightButtonDown() && (event.getChangeX() != 0 || event.getChangeY() != 0)) {
 			boolean isOrtho = vfr.getCameraMode().getView() == View.ORTHO;
 
-			// FIXME: doesnt work properly in ortho free
-			if (event.isShiftDown() || isOrtho) {
+			if (event.isShiftDown() || vfr.getCameraMode().hasDirection()) {
 				Ray lastRay = RayHelper.rayFromClick(vfr, event.getLastX(), event.getLastY());
 
 				Position positionChange = lastRay.end().clone().subtract(event.getRay().end());
