@@ -2,8 +2,6 @@ package me.opl.apps.modelcreator2.tool.tool;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import com.jogamp.opengl.math.FloatUtil;
-
 import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.CuboidElement;
@@ -14,12 +12,12 @@ import me.opl.apps.modelcreator2.model.RotatableElement;
 import me.opl.apps.modelcreator2.model.Rotation;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
+import me.opl.apps.modelcreator2.util.MathHelper;
 import me.opl.apps.modelcreator2.util.RayHelper;
 import me.opl.apps.modelcreator2.util.RotationHelper;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.renderer.ElementCreateToolRenderer;
 import me.opl.apps.modelcreator2.viewport.renderer.ToolRenderer;
-import sun.util.logging.resources.logging;
 
 public class ElementCreateTool extends CameraTool {
 	private BaseModel model;
@@ -152,8 +150,8 @@ public class ElementCreateTool extends CameraTool {
 					float vl = (float) Math.round(cursorPlaneV.length());
 					Position point = p.clone();
 					p.set(0, 0, 0);
-					if (!FloatUtil.isEqual(ul, 0)) p.add(cursorPlaneU.clone().multiply(Math.round(point.dot(cursorPlaneU) / cursorPlaneU.dot(cursorPlaneU) * ul) / ul));
-					if (!FloatUtil.isEqual(vl, 0)) p.add(cursorPlaneV.clone().multiply(Math.round(point.dot(cursorPlaneV) / cursorPlaneV.dot(cursorPlaneV) * vl) / vl));
+					if (!MathHelper.isZero(ul)) p.add(cursorPlaneU.clone().multiply(Math.round(point.dot(cursorPlaneU) / cursorPlaneU.dot(cursorPlaneU) * ul) / ul));
+					if (!MathHelper.isZero(vl)) p.add(cursorPlaneV.clone().multiply(Math.round(point.dot(cursorPlaneV) / cursorPlaneV.dot(cursorPlaneV) * vl) / vl));
 					p.add(cursorPlaneOrigin);
 				}
 			}
@@ -165,7 +163,7 @@ public class ElementCreateTool extends CameraTool {
 
 					if (!event.isShiftDown()) {
 						float len = point.clone().subtract(cursorPlaneOrigin).length();
-						if (!FloatUtil.isEqual(len, 0)) point.subtract(cursorPlaneOrigin).multiply(Math.round(len) / len).add(cursorPlaneOrigin);
+						if (!MathHelper.isZero(len)) point.subtract(cursorPlaneOrigin).multiply(Math.round(len) / len).add(cursorPlaneOrigin);
 					}
 
 					point2.set(point);
@@ -185,7 +183,7 @@ public class ElementCreateTool extends CameraTool {
 					point2 = cursor.clone();
 
 					// FIXME: check if the element isnt of depth 0 on more than 1 axis
-					if (point1PlaneNormal.cross(cursorPlaneNormal).isZero() && FloatUtil.isEqual(cursorPlaneOrigin.clone().subtract(point1PlaneOrigin).dot(cursorPlaneNormal), 0)) {
+					if (point1PlaneNormal.cross(cursorPlaneNormal).isZero() && MathHelper.isZero(cursorPlaneOrigin.clone().subtract(point1PlaneOrigin).dot(cursorPlaneNormal))) {
 						cursorPlaneOrigin = point2.clone();
 						stage = CreationStage.CUBOID;
 					} else {

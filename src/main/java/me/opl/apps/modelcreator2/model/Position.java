@@ -1,6 +1,6 @@
 package me.opl.apps.modelcreator2.model;
 
-import com.jogamp.opengl.math.FloatUtil;
+import me.opl.apps.modelcreator2.util.MathHelper;
 
 public class Position implements Cloneable {
 	private float x;
@@ -282,7 +282,7 @@ public class Position implements Cloneable {
 	public Position normalize() {
 		float l = length();
 
-		if (FloatUtil.isEqual(l, 0)) return this;
+		if (MathHelper.isEqual(l, 0)) return this;
 
 		x /= l;
 		y /= l;
@@ -299,7 +299,7 @@ public class Position implements Cloneable {
 	public Position normalize(Position origin) {
 		float l = distance(origin);
 
-		if (FloatUtil.isEqual(l, 0)) return this;
+		if (MathHelper.isEqual(l, 0)) return this;
 
 		x = ((x - origin.getX()) / l) + origin.getX();
 		y = ((y - origin.getY()) / l) + origin.getY();
@@ -318,7 +318,7 @@ public class Position implements Cloneable {
 	public Position normalize(float x, float y, float z) {
 		float l = distance(x, y, z);
 
-		if (FloatUtil.isEqual(l, 0)) return this;
+		if (MathHelper.isZero(l)) return this;
 
 		this.x = ((this.x - x) / l) + x;
 		this.y = ((this.y - y) / l) + y;
@@ -330,7 +330,7 @@ public class Position implements Cloneable {
 	 * @return {@code true} if the vector's length is 0, {@code false} otherwise
 	 */
 	public boolean isZero() {
-		return FloatUtil.isEqual(this.x, 0) && FloatUtil.isEqual(this.y, 0) && FloatUtil.isEqual(this.z, 0);
+		return MathHelper.isZero(this.x) && MathHelper.isZero(this.y) && MathHelper.isZero(this.z);
 	}
 
 	/**
@@ -349,11 +349,11 @@ public class Position implements Cloneable {
 		if (!(obj instanceof Position)) return false;
 
 		Position pos = (Position) obj;
-		return FloatUtil.isEqual(x, pos.x) && FloatUtil.isEqual(y, pos.y) && FloatUtil.isEqual(z, pos.z);
+		return MathHelper.isEqual(x, pos.x) && MathHelper.isEqual(y, pos.y) && MathHelper.isEqual(z, pos.z);
 	}
 
 	public boolean equals(float x, float y, float z) {
-		return FloatUtil.isEqual(this.x, x) && FloatUtil.isEqual(this.y, y) && FloatUtil.isEqual(this.z, z);
+		return MathHelper.isEqual(this.x, x) && MathHelper.isEqual(this.y, y) && MathHelper.isEqual(this.z, z);
 	}
 
 	@Override

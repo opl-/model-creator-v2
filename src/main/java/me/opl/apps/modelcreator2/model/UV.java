@@ -1,6 +1,6 @@
 package me.opl.apps.modelcreator2.model;
 
-import com.jogamp.opengl.math.FloatUtil;
+import me.opl.apps.modelcreator2.util.MathHelper;
 
 public class UV {
 	private float x1;
@@ -86,11 +86,11 @@ public class UV {
 		if (!(obj instanceof UV)) return false;
 
 		UV uv = (UV) obj;
-		return FloatUtil.isEqual(x1, uv.x1) && FloatUtil.isEqual(y1, uv.y1) && FloatUtil.isEqual(x2, uv.x2) && FloatUtil.isEqual(y2, uv.y2);
+		return MathHelper.isEqual(x1, uv.x1) && MathHelper.isEqual(y1, uv.y1) && MathHelper.isEqual(x2, uv.x2) && MathHelper.isEqual(y2, uv.y2);
 	}
 
 	public boolean equals(float x1, float y1, float x2, float y2) {
-		return FloatUtil.isEqual(this.x1, x1) && FloatUtil.isEqual(this.y1, y1) && FloatUtil.isEqual(this.x2, x2) && FloatUtil.isEqual(this.y2, y2);
+		return MathHelper.isEqual(this.x1, x1) && MathHelper.isEqual(this.y1, y1) && MathHelper.isEqual(this.x2, x2) && MathHelper.isEqual(this.y2, y2);
 	}
 
 	@Override

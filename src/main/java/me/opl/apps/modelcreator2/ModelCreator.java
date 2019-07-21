@@ -30,7 +30,6 @@ import me.opl.apps.modelcreator2.tool.ToolManager;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.ViewportContextInitializer;
 
-// TODO: replace FloatUtil.isEqual with something that actually uses the epsilon
 // TODO: display matrix previews (1.13 apparently differs from the previous versions)
 // TODO: vertex snapping
 // TODO: look into styling (web L&F looks neat: https://github.com/mgarin/weblaf/tree/styling)

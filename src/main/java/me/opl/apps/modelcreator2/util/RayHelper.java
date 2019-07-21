@@ -195,7 +195,7 @@ public class RayHelper {
 		Position lineDir = linePoint2.clone().subtract(linePoint1).normalize();
 
 		float lineDirDot = lineDir.dot(lineDir);
-		if (FloatUtil.isEqual(lineDirDot, 0)) return null;
+		if (MathHelper.isZero(lineDirDot)) return null;
 
 		float t = lineDir.dot(point.clone().subtract(linePoint1)) / lineDirDot;
 

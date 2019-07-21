@@ -1,7 +1,6 @@
 package me.opl.apps.modelcreator2.model;
 
-import com.jogamp.opengl.math.FloatUtil;
-
+import me.opl.apps.modelcreator2.util.MathHelper;
 import me.opl.apps.modelcreator2.util.RotationHelper;
 
 public class Rotation {
@@ -251,15 +250,15 @@ public class Rotation {
 		if (!(obj instanceof Rotation)) return false;
 
 		Rotation rot = (Rotation) obj;
-		return FloatUtil.isEqual(xr, rot.xr) && FloatUtil.isEqual(yr, rot.yr) && FloatUtil.isEqual(zr, rot.zr);
+		return MathHelper.isEqual(xr, rot.xr) && MathHelper.isEqual(yr, rot.yr) && MathHelper.isEqual(zr, rot.zr);
 	}
 
 	public boolean equalsr(float xr, float yr, float zr) {
-		return FloatUtil.isEqual(this.xr, xr) && FloatUtil.isEqual(this.yr, yr) && FloatUtil.isEqual(this.zr, zr);
+		return MathHelper.isEqual(this.xr, xr) && MathHelper.isEqual(this.yr, yr) && MathHelper.isEqual(this.zr, zr);
 	}
 
 	public boolean equalsd(float xd, float yd, float zd) {
-		return FloatUtil.isEqual(this.xr, xd * RotationHelper.TO_RADIANS) && FloatUtil.isEqual(this.yr, yd * RotationHelper.TO_RADIANS) && FloatUtil.isEqual(this.zr, zd * RotationHelper.TO_RADIANS);
+		return MathHelper.isEqual(this.xr, xd * RotationHelper.TO_RADIANS) && MathHelper.isEqual(this.yr, yd * RotationHelper.TO_RADIANS) && MathHelper.isEqual(this.zr, zd * RotationHelper.TO_RADIANS);
 	}
 
 	@Override
