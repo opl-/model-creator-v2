@@ -1,7 +1,7 @@
 package me.opl.apps.modelcreator2.model;
 
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.event.BlockStateNameChange;
+import me.opl.apps.modelcreator2.event.blockstate.BlockStateNameChangingEvent;
 
 // TODO
 public class BlockState {
@@ -24,14 +24,14 @@ public class BlockState {
 	}
 
 	/**
-	 * Set a new name for this block state. Fires {@link BlockStateNameChange} event.
+	 * Set a new name for this block state. Fires {@link BlockStateNameChangingEvent} event.
 	 *
 	 * @param newName New name for this block state
 	 */
 	public void setName(String newName) {
 		if (name == null) throw new IllegalArgumentException("name cannot be null");
 
-		BlockStateNameChange event = new BlockStateNameChange(this, newName);
+		BlockStateNameChangingEvent event = new BlockStateNameChangingEvent(this, newName);
 
 		modelCreator.getGlobalEventDispatcher().fire(event);
 

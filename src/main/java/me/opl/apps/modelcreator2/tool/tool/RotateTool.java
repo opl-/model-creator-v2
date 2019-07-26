@@ -1,8 +1,8 @@
 package me.opl.apps.modelcreator2.tool.tool;
 
 import me.opl.apps.modelcreator2.model.Axis;
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.RotatableElement;
 import me.opl.apps.modelcreator2.model.Rotation;
@@ -18,7 +18,7 @@ public class RotateTool extends SelectionTool {
 	private static final float ROTATION_225 = 22.5f * RotationHelper.TO_RADIANS;
 	private static final float ROTATION_90 = 90f * RotationHelper.TO_RADIANS;
 
-	private BaseModel model;
+	private MinecraftModel model;
 
 	private Position actionCenter = new Position(8, 8, 8);
 	private Axis rotationAxis;
@@ -27,7 +27,7 @@ public class RotateTool extends SelectionTool {
 
 	private boolean rotating;
 
-	public RotateTool(BaseModel model) {
+	public RotateTool(MinecraftModel model) {
 		this.model = model;
 	}
 

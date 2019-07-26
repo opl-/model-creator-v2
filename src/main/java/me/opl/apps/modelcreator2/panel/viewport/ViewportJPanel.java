@@ -11,7 +11,7 @@ import javax.swing.TransferHandler;
 import me.opl.apps.modelcreator2.MCVariableProvider;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
+import me.opl.apps.modelcreator2.event.model.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.viewport.FramebufferJPanel;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer;
 import me.opl.apps.modelcreator2.viewport.ViewportFramebufferRenderer.CameraMode;

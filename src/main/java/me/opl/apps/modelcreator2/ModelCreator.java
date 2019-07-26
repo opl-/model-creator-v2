@@ -7,21 +7,20 @@ import java.util.WeakHashMap;
 
 import javax.swing.UIManager;
 
-import me.opl.apps.modelcreator2.event.BlockStateOpenedEvent;
 import me.opl.apps.modelcreator2.event.EventDispatcher;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.event.WindowClosedEvent;
+import me.opl.apps.modelcreator2.event.blockstate.BlockStateOpenedEvent;
+import me.opl.apps.modelcreator2.event.model.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.exporter.ExporterManager;
 import me.opl.apps.modelcreator2.importer.ImporterManager;
 import me.opl.apps.modelcreator2.menu.ContextMenuManager;
-import me.opl.apps.modelcreator2.model.BaseModel;
-import me.opl.apps.modelcreator2.model.BlockModel;
 import me.opl.apps.modelcreator2.model.BlockState;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.CuboidElement;
 import me.opl.apps.modelcreator2.model.Face;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Rotation;
@@ -47,17 +46,16 @@ public class ModelCreator implements EventListener {
 	 * The RenderManager instance for rendering model viewports.
 	 */
 	private RenderManager renderManager = new RenderManager(new ViewportContextInitializer());
-	private Map<BaseModel, ToolManager> toolManagers = new WeakHashMap<>();
+	private Map<MinecraftModel, ToolManager> toolManagers = new WeakHashMap<>();
 
 	private ContextMenuManager windowMenuManager = ContextMenuManager.createDefaultWindowMenuManager(this);
 
 	private List<ModelWindow> windows = new ArrayList<>();
 
-	private List<BaseModel> models = new ArrayList<>();
+	private List<MinecraftModel> models = new ArrayList<>();
 	private List<BlockState> blockStates = new ArrayList<>();
 
 	private EventDispatcher globalEventDispatcher = new EventDispatcher(null);
-	private WeakHashMap<BaseModel, EventDispatcher> eventDispatchers = new WeakHashMap<>();
 
 	public ModelCreator() {
 		getGlobalEventDispatcher().registerListeners(this);
@@ -75,7 +73,7 @@ public class ModelCreator implements EventListener {
 
 		// XXX: test model
 		// cube.json
-		BlockModel cubeModel = new BlockModel(instance, null, "cube");
+		MinecraftModel cubeModel = new MinecraftModel(instance, null, "cube");
 		cubeModel.setHasElements(true);
 		/*for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++) {
 			CuboidElement element = new CuboidElement(new Position(x, y, z), new Position(x + 1, y + 1, z + 1));
@@ -107,14 +105,14 @@ public class ModelCreator implements EventListener {
 		cubeModel.addElement(element);
 
 		// cube_all.json
-		BlockModel cubeAllModel = new BlockModel(instance, cubeModel, "cube_all");
+		MinecraftModel cubeAllModel = new MinecraftModel(instance, cubeModel, "cube_all");
 		cubeAllModel.addTexture(new Texture("particle", "all"));
 		for (Face f : Face.values()) {
 			cubeAllModel.addTexture(new Texture(f.name().toLowerCase(), "all"));
 		}
 
 		// coal_block.json
-		BlockModel model = new BlockModel(instance, cubeAllModel, "coal_block");
+		MinecraftModel model = new MinecraftModel(instance, cubeAllModel, "coal_block");
 
 		ResourceLocation resourceLocation = new ResourceLocation("minecraft:block/comparator_on");
 		// TODO: do this load call elsewhere
@@ -126,7 +124,7 @@ public class ModelCreator implements EventListener {
 
 		instance.addModel(model);
 
-		/*BaseModel hammerModel = new MinecraftBlockModelImporter().open(instance, new ResourceLocation("blocks/hammer"), new FileInputStream(new File("C:\\Users\\opl\\Desktop\\mymodels\\reinhardt\\hammer.json")))[0];
+		/*BaseModel hammerModel = new MinecraftMinecraftModelImporter().open(instance, new ResourceLocation("blocks/hammer"), new FileInputStream(new File("C:\\Users\\opl\\Desktop\\mymodels\\reinhardt\\hammer.json")))[0];
 		instance.addModel(hammerModel);
 		instance.getRenderManager().getResourceManager().loadTexture(new ResourceLocation("Downloads/hammer"));*/
 	}
@@ -161,7 +159,7 @@ public class ModelCreator implements EventListener {
 	 * @throws NullPointerException if the passed model is {@code null}
 	 * @throws IllegalArgumentException if the model doesn't have elements
 	 */
-	public ToolManager getToolManager(BaseModel model) {
+	public ToolManager getToolManager(MinecraftModel model) {
 		if (model == null) return null;
 
 		if (!model.hasElements()) throw new IllegalArgumentException("Tried to get a tool manager for a model with no elements");
@@ -180,45 +178,34 @@ public class ModelCreator implements EventListener {
 		return globalEventDispatcher;
 	}
 
-	public EventDispatcher getEventDispatcher(BaseModel model) {
-		EventDispatcher eventDispatcher = eventDispatchers.get(model);
-
-		if (eventDispatcher == null) {
-			eventDispatcher = new EventDispatcher(globalEventDispatcher);
-			eventDispatchers.put(model, eventDispatcher);
-		}
-
-		return eventDispatcher;
+	public MinecraftModel[] getModels() {
+		return models.toArray(new MinecraftModel[models.size()]);
 	}
 
-	public BaseModel[] getModels() {
-		return models.toArray(new BaseModel[models.size()]);
-	}
-
-	public int getModelIndex(BaseModel model) {
+	public int getModelIndex(MinecraftModel model) {
 		return models.indexOf(model);
 	}
 
-	public void addModel(BaseModel model) {
+	public void addModel(MinecraftModel model) {
 		models.add(model);
 
 		getGlobalEventDispatcher().fire(new ModelOpenedEvent(model));
 	}
 
-	public BaseModel getModelByReference(String reference) {
+	public MinecraftModel getModelByReference(String reference) {
 		String[] ref = reference.split("\0");
 		if (ref.length != 2) return null;
 
 		int index = Integer.parseInt(ref[1]);
 		if (index < 0 || index >= models.size()) return null;
 
-		BaseModel model = models.get(index);
+		MinecraftModel model = models.get(index);
 		if (!model.getName().equals(ref[0])) return null;
 
 		return model;
 	}
 
-	public String getModelReference(BaseModel model) {
+	public String getModelReference(MinecraftModel model) {
 		int index = models.indexOf(model);
 		if (index < 0) return null;
 

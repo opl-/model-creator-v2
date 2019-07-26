@@ -13,8 +13,8 @@ import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Fragment;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.PlaybackState;
 import me.opl.apps.modelcreator2.tool.Tool;
 import me.opl.apps.modelcreator2.viewport.renderer.Renderer;
@@ -76,7 +76,7 @@ public class RenderManager implements GLEventListener {
 		return (T) rendererInstances.get(rendererClass);
 	}
 
-	public Renderer getFragmentRenderer(BaseModel model, Fragment fragment) {
+	public Renderer getFragmentRenderer(MinecraftModel model, Fragment fragment) {
 		Renderer renderer = fragmentRenderers.get(fragment);
 
 		if (renderer == null) {

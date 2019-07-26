@@ -17,7 +17,7 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
 import me.opl.apps.modelcreator2.tool.Tool;
@@ -92,7 +92,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 		modelListMenu = new JMenu("Display model");
 
-		for (final BaseModel m : modelCreator.getModels()) {
+		for (final MinecraftModel m : modelCreator.getModels()) {
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(m.getName(), m == getModel());
 
 			item.addActionListener(new ActionListener() {
@@ -114,11 +114,11 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 		popupMenu.show(view, 0, 17);
 	}
 
-	public BaseModel getModel() {
+	public MinecraftModel getModel() {
 		return view.getViewportFramebufferRenderer().getDisplayedModel();
 	}
 
-	public void setModel(BaseModel model) {
+	public void setModel(MinecraftModel model) {
 		view.getViewportFramebufferRenderer().setDisplayedModel(model);
 	}
 
@@ -128,7 +128,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 		ToolManager tm = model == null ? null : modelCreator.getToolManager(model);
 
 		for (int i = 1; i < Math.min(16, MouseInfo.getNumberOfButtons()); i++) if (!dragState[i - 1] && (e.getModifiersEx() & MouseEvent.getMaskForButton(i)) != 0) {
@@ -149,7 +149,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 
 		if (model != null) {
 			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.HOVER, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
@@ -161,7 +161,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 
 		// XXX: dev tool switcher (that i totally didn't forget about)
 		if (e.getX() < 20 && e.getY() < 20) {
@@ -189,7 +189,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 			showPopupMenu();
 		}
 
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 
 		if (model != null) {
 			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.DOWN, e.getButton(), getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, e.isControlDown(), e.isShiftDown(), e.isAltDown()));
@@ -201,7 +201,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		System.out.println("release " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()) + " " + e.getButton());
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 
 		if (e.getButton() > 0 && e.getButton() <= 16 && dragState[e.getButton() - 1]) {
 			if (model != null) {
@@ -219,7 +219,7 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		System.out.println("scroll  " + Integer.toBinaryString(0x80000000 | e.getModifiersEx()));
-		BaseModel model = vfr.getEditedModel();
+		MinecraftModel model = vfr.getEditedModel();
 
 		if (model != null) {
 			modelCreator.getToolManager(model).firePointerEvent(new PointerToolEvent(view.getViewportFramebufferRenderer(), PointerEventType.SCROLL, MouseEvent.BUTTON2, getButtonStatesFromEvent(e), e.getClickCount(), e.getX(), e.getY(), lastMouseX, lastMouseY, (float) e.getPreciseWheelRotation(), e.isControlDown(), e.isShiftDown(), e.isAltDown()));

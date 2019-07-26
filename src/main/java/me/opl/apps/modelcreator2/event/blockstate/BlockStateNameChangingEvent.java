@@ -1,20 +1,22 @@
-package me.opl.apps.modelcreator2.event;
+package me.opl.apps.modelcreator2.event.blockstate;
 
+import me.opl.apps.modelcreator2.event.EventCancellable;
 import me.opl.apps.modelcreator2.model.BlockState;
 
-public class BlockStateNameChange extends Event implements EventCancellable {
-	private BlockState blockState;
+public class BlockStateNameChangingEvent extends BlockStateEvent implements EventCancellable {
+	private String oldName;
 	private String newName;
 
 	private boolean cancelled = false;
 
-	public BlockStateNameChange(BlockState blockState, String newName) {
-		this.blockState = blockState;
+	public BlockStateNameChangingEvent(BlockState blockState, String newName) {
+		super(blockState);
+		this.oldName = blockState.getName();
 		this.newName = newName;
 	}
 
 	public String getOldName() {
-		return blockState.getName();
+		return oldName;
 	}
 
 	public String getNewName() {

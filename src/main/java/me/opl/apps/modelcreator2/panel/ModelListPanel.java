@@ -23,12 +23,12 @@ import javax.swing.tree.TreePath;
 
 import me.opl.apps.modelcreator2.MCVariableProvider;
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.event.BlockStateOpenedEvent;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.event.blockstate.BlockStateOpenedEvent;
+import me.opl.apps.modelcreator2.event.model.ModelOpenedEvent;
 import me.opl.apps.modelcreator2.model.BlockState;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.libs.tablib.AbstractPanel;
 
 // TODO: render model previews to use as icons
@@ -198,8 +198,8 @@ public class ModelListPanel extends AbstractPanel {
 						throw new IllegalStateException("Icon not found", e);
 					}
 				}
-			} else if (value instanceof BaseModel) {
-				BaseModel model = (BaseModel) value;
+			} else if (value instanceof MinecraftModel) {
+				MinecraftModel model = (MinecraftModel) value;
 
 				setText(model.getName());
 			} else if (value instanceof BlockState) {

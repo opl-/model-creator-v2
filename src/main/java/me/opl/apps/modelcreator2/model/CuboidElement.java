@@ -1,17 +1,17 @@
 package me.opl.apps.modelcreator2.model;
 
-import me.opl.apps.modelcreator2.event.ElementsResizedEvent;
-import me.opl.apps.modelcreator2.event.ElementsRotatedEvent;
+import me.opl.apps.modelcreator2.event.model.ElementsResizedEvent;
+import me.opl.apps.modelcreator2.event.model.ElementsRotatedEvent;
 
 public class CuboidElement extends RotatableElement {
-	private BaseModel model;
+	private MinecraftModel model;
 	private Cuboid cuboid;
 
-	public CuboidElement(BaseModel model) {
+	public CuboidElement(MinecraftModel model) {
 		this(model, new Position(0, 0, 0), new Position(16, 16, 16));
 	}
 
-	public CuboidElement(BaseModel model, Position from, Position to) {
+	public CuboidElement(MinecraftModel model, Position from, Position to) {
 		this.model = model;
 		cuboid = new Cuboid(this, from, to);
 	}

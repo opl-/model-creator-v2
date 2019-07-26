@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Ray;
 import me.opl.apps.modelcreator2.model.RayFaceIntersection;
 import me.opl.apps.modelcreator2.util.RayHelper;
@@ -71,7 +71,7 @@ public class PointerToolEvent extends ToolEvent {
 	 * @return The current displayed model of the
 	 * {@link ViewportFramebufferRenderer} this event was triggered by
 	 */
-	public BaseModel getDisplayedModel() {
+	public MinecraftModel getDisplayedModel() {
 		return framebufferRenderer.getDisplayedModel();
 	}
 
@@ -79,7 +79,7 @@ public class PointerToolEvent extends ToolEvent {
 	 * @return The current edited model of the
 	 * {@link ViewportFramebufferRenderer} this event was triggered by
 	 */
-	public BaseModel getEditedModel() {
+	public MinecraftModel getEditedModel() {
 		return framebufferRenderer.getEditedModel();
 	}
 
@@ -250,7 +250,7 @@ public class PointerToolEvent extends ToolEvent {
 	}
 
 	private RayFaceIntersection[] intersectRay(Ray ray) {
-		BaseModel editedModel = getEditedModel();
+		MinecraftModel editedModel = getEditedModel();
 
 		if (editedModel == null) return new RayFaceIntersection[0];
 

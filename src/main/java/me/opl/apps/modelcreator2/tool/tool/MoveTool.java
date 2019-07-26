@@ -1,15 +1,15 @@
 package me.opl.apps.modelcreator2.tool.tool;
 
-import me.opl.apps.modelcreator2.event.ElementsResizedEvent;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.SelectionChangedEvent;
+import me.opl.apps.modelcreator2.event.model.ElementsResizedEvent;
+import me.opl.apps.modelcreator2.event.model.SelectionChangedEvent;
 import me.opl.apps.modelcreator2.model.Axis;
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
 import me.opl.apps.modelcreator2.model.Face;
 import me.opl.apps.modelcreator2.model.FaceData;
 import me.opl.apps.modelcreator2.model.Grid;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.Ray;
 import me.opl.apps.modelcreator2.model.RotatableElement;
@@ -23,7 +23,7 @@ import me.opl.apps.modelcreator2.viewport.renderer.MoveToolRenderer;
 import me.opl.apps.modelcreator2.viewport.renderer.ToolRenderer;
 
 public class MoveTool extends SelectionTool implements EventListener {
-	private BaseModel model;
+	private MinecraftModel model;
 
 	private Position actionCenter;
 	private Position appliedChange = new Position();
@@ -43,7 +43,7 @@ public class MoveTool extends SelectionTool implements EventListener {
 
 	private Position tempMove;
 
-	public MoveTool(BaseModel model) {
+	public MoveTool(MinecraftModel model) {
 		this.model = model;
 
 		model.getEventDispatcher().registerListeners(this);

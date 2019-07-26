@@ -2,7 +2,7 @@ package me.opl.apps.modelcreator2.tool;
 
 import java.util.ArrayList;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
 import me.opl.apps.modelcreator2.tool.tool.ElementCreateTool;
 import me.opl.apps.modelcreator2.tool.tool.MoveTool;
@@ -13,7 +13,7 @@ public class ToolManager {
 
 	private Tool activeTool;
 
-	public ToolManager(BaseModel model) {
+	public ToolManager(MinecraftModel model) {
 		registerTool(new MoveTool(model));
 		registerTool(new RotateTool(model));
 		registerTool(new ElementCreateTool(model));

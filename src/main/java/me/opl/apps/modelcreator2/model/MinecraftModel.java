@@ -4,25 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.event.ElementsResizedEvent;
-import me.opl.apps.modelcreator2.event.ElementsRotatedEvent;
 import me.opl.apps.modelcreator2.event.EventDispatcher;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.ModelNameChange;
-import me.opl.apps.modelcreator2.event.SelectionChangedEvent;
-import me.opl.apps.modelcreator2.event.SelectionChangedEvent.ChangeType;
+import me.opl.apps.modelcreator2.event.model.ElementsResizedEvent;
+import me.opl.apps.modelcreator2.event.model.ElementsRotatedEvent;
+import me.opl.apps.modelcreator2.event.model.ModelNameChangingEvent;
+import me.opl.apps.modelcreator2.event.model.SelectionChangedEvent;
+import me.opl.apps.modelcreator2.event.model.SelectionChangedEvent.ChangeType;
 
-public class BaseModel implements EventListener {
-	private ModelCreator modelCreator;
+public class MinecraftModel implements EventListener {
 	private EventDispatcher eventDispatcher;
-	protected BaseModel parentModel;
+	protected MinecraftModel parentModel;
 
 	private String name;
 
 	private ElementGroup rootGroup = new ElementGroup();
 	private ArrayList<Element> elements;
 	private ArrayList<Texture> textures = new ArrayList<>();
+
+	private boolean ambientOcclusion = true;
 
 	private List<FaceData> selectedFaces = new ArrayList<>();
 	private List<Element> selectedElements = new ArrayList<>();
@@ -35,12 +36,11 @@ public class BaseModel implements EventListener {
 	 */
 	private Position selectionCenter = null;
 
-	protected BaseModel(ModelCreator modelCreator, BaseModel parentModel, String name) {
-		this.modelCreator = modelCreator;
+	public MinecraftModel(ModelCreator modelCreator, MinecraftModel parentModel, String name) {
 		this.parentModel = parentModel;
 		this.name = name;
 
-		eventDispatcher = modelCreator.getEventDispatcher(this);
+		eventDispatcher = new EventDispatcher(modelCreator.getGlobalEventDispatcher());
 		eventDispatcher.registerListeners(this);
 	}
 
@@ -49,7 +49,7 @@ public class BaseModel implements EventListener {
 	 *
 	 * @return Parent model if it exists, null otherwise
 	 */
-	public BaseModel getParent() {
+	public MinecraftModel getParent() {
 		return parentModel;
 	}
 
@@ -71,23 +71,23 @@ public class BaseModel implements EventListener {
 	 * @return Model instance which holds the elements or {@code null} if none
 	 * exist
 	 */
-	public BaseModel getModelWithElements() {
-		BaseModel model = this;
+	public MinecraftModel getModelWithElements() {
+		MinecraftModel model = this;
 		while (model != null && !model.hasElements()) model = model.getParent();
 		return model;
 	}
 
 	/**
-	 * Set a new name for this model. Fires {@link ModelNameChange} event.
+	 * Set a new name for this model. Fires {@link ModelNameChangingEvent} event.
 	 *
 	 * @param newName New name for this model
 	 */
 	public void setName(String newName) {
 		if (name == null) throw new IllegalArgumentException("name cannot be null");
 
-		ModelNameChange event = new ModelNameChange(this, newName);
+		ModelNameChangingEvent event = new ModelNameChangingEvent(this, newName);
 
-		modelCreator.getGlobalEventDispatcher().fire(event);
+		eventDispatcher.fire(event);
 
 		if (event.isCancelled()) return;
 
@@ -249,6 +249,20 @@ public class BaseModel implements EventListener {
 	}
 
 	/**
+	 * @param ambientOcclusion New ambient occlusion value
+	 */
+	public void setAmbientOcclusion(boolean ambientOcclusion) {
+		this.ambientOcclusion = ambientOcclusion;
+	}
+
+	/**
+	 * @return Current ambient occlusion value
+	 */
+	public boolean getAmbientOcclusion() {
+		return ambientOcclusion;
+	}
+
+	/**
 	 * @return {@code true} if this model has any selected faces, {@code false}
 	 * otherwise
 	 */
@@ -371,8 +385,8 @@ public class BaseModel implements EventListener {
 	}
 
 	/**
-	 * Toggle face selection. Calls {@link BaseModel#selectFace(FaceData)} or
-	 * {@link BaseModel#deselectFace(FaceData)}.
+	 * Toggle face selection. Calls {@link MinecraftModel#selectFace(FaceData)} or
+	 * {@link MinecraftModel#deselectFace(FaceData)}.
 	 *
 	 * @return {@code true} if the face is now selected, {@code false} otherwise
 	 */

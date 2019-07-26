@@ -2,10 +2,10 @@ package me.opl.apps.modelcreator2.tool.tool;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.CuboidElement;
 import me.opl.apps.modelcreator2.model.Face;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.RayFaceIntersection;
 import me.opl.apps.modelcreator2.model.RotatableElement;
@@ -20,7 +20,7 @@ import me.opl.apps.modelcreator2.viewport.renderer.ElementCreateToolRenderer;
 import me.opl.apps.modelcreator2.viewport.renderer.ToolRenderer;
 
 public class ElementCreateTool extends CameraTool {
-	private BaseModel model;
+	private MinecraftModel model;
 
 	private CreationStage stage = CreationStage.POINT;
 
@@ -38,7 +38,7 @@ public class ElementCreateTool extends CameraTool {
 	private Rotation rotation;
 	private Position rotationOrigin;
 
-	public ElementCreateTool(BaseModel model) {
+	public ElementCreateTool(MinecraftModel model) {
 		this.model = model;
 	}
 
@@ -204,7 +204,7 @@ public class ElementCreateTool extends CameraTool {
 		}
 	}
 
-	private void createElement(BaseModel model) {
+	private void createElement(MinecraftModel model) {
 		CuboidElement element = new CuboidElement(model);
 
 		Position point1 = RotationHelper.rotate(this.point1.clone(), rotation.inverted(), rotationOrigin);

@@ -9,10 +9,10 @@ import org.json.JSONTokener;
 
 import me.opl.apps.modelcreator2.ModelCreator;
 import me.opl.apps.modelcreator2.model.Axis;
-import me.opl.apps.modelcreator2.model.BlockModel;
 import me.opl.apps.modelcreator2.model.CuboidElement;
 import me.opl.apps.modelcreator2.model.Face;
 import me.opl.apps.modelcreator2.model.FaceData;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Rotation;
@@ -22,7 +22,7 @@ import me.opl.apps.modelcreator2.model.UV;
 // TODO: differentiate between block and item models. somehow
 // TODO: load parent models
 // TODO: create an exception or result object to give users feedback on why the loading failed or if any problems were found with the model. could also use it to tell what else needs to be loaded
-public class MinecraftBlockModelImporter implements Importer {
+public class MinecraftModelImporter implements Importer {
 	@Override
 	public boolean open(ModelCreator modelCreator, ResourceLocation resourceLocation, InputStream stream) {
 		JSONObject json;
@@ -32,7 +32,7 @@ public class MinecraftBlockModelImporter implements Importer {
 			return false;
 		}
 
-		BlockModel model = new BlockModel(modelCreator, null, resourceLocation.getPath());
+		MinecraftModel model = new MinecraftModel(modelCreator, null, resourceLocation.getPath());
 
 		model.setAmbientOcclusion(json.optBoolean("ambientocclusion", true));
 
@@ -49,7 +49,7 @@ public class MinecraftBlockModelImporter implements Importer {
 		return true;
 	}
 
-	private void createTextures(JSONObject json, BlockModel model) {
+	private void createTextures(JSONObject json, MinecraftModel model) {
 		JSONObject texturesObject = json.optJSONObject("textures");
 
 		if (texturesObject == null || texturesObject.length() == 0) return;
@@ -65,7 +65,7 @@ public class MinecraftBlockModelImporter implements Importer {
 		}
 	}
 
-	private void createElements(JSONObject json, BlockModel model) {
+	private void createElements(JSONObject json, MinecraftModel model) {
 		JSONArray elementsArray = json.optJSONArray("elements");
 
 		if (elementsArray == null) return;
@@ -115,7 +115,7 @@ public class MinecraftBlockModelImporter implements Importer {
 					JSONArray uvArray = face.optJSONArray("uv");
 
 					if (uvArray != null) {
-						// TODO: detect texture rotation (inside of the UV class?)
+						// TODO: detect texture flipping (inside of the UV class?)
 						faceData.setUV(arrayToUV(uvArray));
 					}
 				} else {

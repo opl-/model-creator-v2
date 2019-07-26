@@ -27,7 +27,7 @@ public abstract class Fragment {
 	 */
 	public abstract Face faceDataToFace(FaceData faceData);
 
-	public abstract Renderer createRenderer(RenderManager renderManager, BaseModel model);
+	public abstract Renderer createRenderer(RenderManager renderManager, MinecraftModel model);
 
 	public abstract RayFaceIntersection[] intersect(Ray ray);
 

@@ -2,10 +2,10 @@ package me.opl.apps.modelcreator2.viewport.renderer;
 
 import com.jogamp.opengl.GL3;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Cuboid;
 import me.opl.apps.modelcreator2.model.Face;
 import me.opl.apps.modelcreator2.model.FaceData;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Texture;
@@ -15,13 +15,13 @@ import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.resource.ModelBuffer;
 
 public class CuboidRenderer implements Renderer {
-	private BaseModel model;
+	private MinecraftModel model;
 	private Cuboid cuboid;
 	private long lastUpdate = -1;
 
 	private ModelBuffer modelBuffer;
 
-	public CuboidRenderer(RenderManager renderManager, BaseModel model, Cuboid cuboid) {
+	public CuboidRenderer(RenderManager renderManager, MinecraftModel model, Cuboid cuboid) {
 		this.model = model;
 		this.cuboid = cuboid;
 

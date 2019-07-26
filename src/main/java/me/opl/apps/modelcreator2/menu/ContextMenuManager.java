@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import me.opl.apps.modelcreator2.ModelCreator;
-import me.opl.apps.modelcreator2.model.BlockModel;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.tool.ToolManager;
 import me.opl.apps.modelcreator2.tool.tool.ElementCreateTool;
 import me.opl.apps.modelcreator2.tool.tool.MoveTool;
@@ -31,7 +31,7 @@ public class ContextMenuManager {
 			@Override
 			public void onMenuAction(MenuItem menuItem) {
 				// TODO: make dialog abstract
-				BlockModel model = new BlockModel(mc, null, JOptionPane.showInputDialog("Enter block model name:"));
+				MinecraftModel model = new MinecraftModel(mc, null, JOptionPane.showInputDialog("Enter block model name:"));
 				model.setHasElements(true);
 				mc.addModel(model);
 			}

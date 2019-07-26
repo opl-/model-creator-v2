@@ -5,9 +5,9 @@ import com.jogamp.opengl.math.FloatUtil;
 
 import me.opl.apps.modelcreator2.ModelCreator;
 import me.opl.apps.modelcreator2.model.Axis;
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.Element;
 import me.opl.apps.modelcreator2.model.Fragment;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.util.RotationHelper;
@@ -42,7 +42,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 	private BoundaryRenderer boundaryRenderer;
 	private CompassOverlayRenderer compassOverlayRenderer;
 
-	private BaseModel model;
+	private MinecraftModel model;
 
 	private RotationHandleRenderer xHandleRenderer;
 
@@ -250,20 +250,20 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		return height;
 	}
 
-	public void setDisplayedModel(BaseModel model) {
+	public void setDisplayedModel(MinecraftModel model) {
 		this.model = model;
 	}
 
-	public BaseModel getDisplayedModel() {
+	public MinecraftModel getDisplayedModel() {
 		return model;
 	}
 
 	/**
-	 * Shorthand for {@link BaseModel#getModelWithElements()}.
+	 * Shorthand for {@link MinecraftModel#getModelWithElements()}.
 	 *
 	 * @return Model which holds the elements or {@code null} if none
 	 */
-	public BaseModel getEditedModel() {
+	public MinecraftModel getEditedModel() {
 		return model == null ? null : model.getModelWithElements();
 	}
 

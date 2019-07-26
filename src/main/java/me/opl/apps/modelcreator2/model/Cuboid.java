@@ -174,7 +174,7 @@ public class Cuboid extends RotatableFragment {
 		return cornerCache;
 	}
 
-	public Renderer createRenderer(RenderManager renderManager, BaseModel model) {
+	public Renderer createRenderer(RenderManager renderManager, MinecraftModel model) {
 		return new CuboidRenderer(renderManager, model, this);
 	}
 

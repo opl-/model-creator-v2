@@ -5,12 +5,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import me.opl.apps.modelcreator2.MCVariableProvider;
-import me.opl.apps.modelcreator2.event.ElementsRotatedEvent;
 import me.opl.apps.modelcreator2.event.EventHandler;
 import me.opl.apps.modelcreator2.event.EventListener;
-import me.opl.apps.modelcreator2.event.ModelOpenedEvent;
-import me.opl.apps.modelcreator2.event.SelectionChangedEvent;
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.event.model.ElementsRotatedEvent;
+import me.opl.apps.modelcreator2.event.model.ModelOpenedEvent;
+import me.opl.apps.modelcreator2.event.model.SelectionChangedEvent;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.RotatableElement;
 import me.opl.libs.tablib.AbstractPanel;
 
@@ -41,7 +41,7 @@ public class PropertiesPanel extends AbstractPanel implements EventListener {
 
 	@EventHandler
 	public void onModelOpened(ModelOpenedEvent event) {
-		BaseModel m = event.getModel();
+		MinecraftModel m = event.getModel();
 
 		m.getEventDispatcher().registerListeners(PropertiesPanel.this);
 	}

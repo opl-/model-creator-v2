@@ -1,13 +1,14 @@
-package me.opl.apps.modelcreator2.event;
+package me.opl.apps.modelcreator2.event.model;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
+import me.opl.apps.modelcreator2.event.EventCancellable;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 
-public class ModelNameChange extends ModelEvent implements EventCancellable {
+public class ModelNameChangingEvent extends ModelEvent implements EventCancellable {
 	private String newName;
 
 	private boolean cancelled = false;
 
-	public ModelNameChange(BaseModel model, String newName) {
+	public ModelNameChangingEvent(MinecraftModel model, String newName) {
 		super(model);
 		this.newName = newName;
 	}

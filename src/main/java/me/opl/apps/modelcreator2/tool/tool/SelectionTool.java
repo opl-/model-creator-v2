@@ -1,7 +1,7 @@
 package me.opl.apps.modelcreator2.tool.tool;
 
-import me.opl.apps.modelcreator2.model.BaseModel;
 import me.opl.apps.modelcreator2.model.FaceData;
+import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent;
 import me.opl.apps.modelcreator2.tool.PointerToolEvent.PointerEventType;
 
@@ -17,7 +17,7 @@ public class SelectionTool extends CameraTool {
 		if (dragSelecting && !event.testHeld(PointerToolEvent.BUTTON_LEFT, PointerToolEvent.MODIFIER_CONTROL)) dragSelecting = false;
 
 		if (event.getType() == PointerEventType.CLICK && event.getButton() == PointerToolEvent.BUTTON_LEFT) {
-			BaseModel editedModel = event.getEditedModel();
+			MinecraftModel editedModel = event.getEditedModel();
 
 			if (event.getRayIntersections().length == 0) {
 				if (!event.isControlDown()) editedModel.deselectAllFaces();
