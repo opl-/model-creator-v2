@@ -44,26 +44,26 @@ public class CameraTool extends Tool {
 				vfr.getCameraTarget().add(positionChange);
 			} else {
 				Position cameraPosition = vfr.getCameraPosition().subtract(vfr.getCameraTarget());
-	
+
 				if (event.getChangeX() != 0) {
 					RotationHelper.rotateY(cameraPosition, (float) (event.getChangeX() * RotationHelper.TO_RADIANS));
 				}
-	
+
 				if (event.getChangeY() != 0) {
 					float toKnownAxis = (float) Math.atan2(-cameraPosition.getZ(), cameraPosition.getX());
-	
+
 					RotationHelper.rotateY(cameraPosition, toKnownAxis);
-	
+
 					float currentRotation = (float) Math.atan2(cameraPosition.getY(), cameraPosition.getX());
 					float rotateBy = (float) (-event.getChangeY() * RotationHelper.TO_RADIANS);
-	
+
 					if (currentRotation - rotateBy > ALMOST_90) rotateBy = -ALMOST_90 + currentRotation;
 					else if (currentRotation - rotateBy < -ALMOST_90) rotateBy = ALMOST_90 + currentRotation;
-	
+
 					RotationHelper.rotateZ(cameraPosition, rotateBy);
 					RotationHelper.rotateY(cameraPosition, -toKnownAxis);
 				}
-	
+
 				cameraPosition.add(vfr.getCameraTarget());
 			}
 		} else {

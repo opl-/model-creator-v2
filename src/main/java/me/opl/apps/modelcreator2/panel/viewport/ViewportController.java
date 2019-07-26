@@ -310,13 +310,13 @@ public class ViewportController implements MouseListener, MouseMotionListener, M
 					Position cameraPosRelativeToTarget = view.getViewportFramebufferRenderer().getCameraPosition().clone().subtract(view.getViewportFramebufferRenderer().getCameraTarget());
 					float angleToKnownAxis = (float) (Math.atan2(-cameraPosRelativeToTarget.getZ(), cameraPosRelativeToTarget.getX()));
 					cameraPosRelativeToTarget.set(RotationHelper.rotateY(cameraPosRelativeToTarget, angleToKnownAxis * RotationHelper.TO_DEGREES));
-	
+
 					float rotationFromY = (float) (-yChange * Math.PI / 540d); // / 180d / 3d // XXX: [settings] rotation sensitivity
 					float currentZRotation = (float) (Math.atan2(cameraPosRelativeToTarget.getY(), cameraPosRelativeToTarget.getX()));
 
 					if (currentZRotation - rotationFromY < Math.PI / -2f + 0.01f) rotationFromY = (float) (Math.PI / 2d - 0.01d + currentZRotation);
 					else if (currentZRotation - rotationFromY > Math.PI / 2f - 0.01f) rotationFromY = (float) (Math.PI / -2d + 0.01d + currentZRotation);
-	
+
 					cameraPosRelativeToTarget.set(RotationHelper.rotateZ(cameraPosRelativeToTarget, rotationFromY * RotationHelper.TO_DEGREES));
 					cameraPosRelativeToTarget.set(RotationHelper.rotateY(cameraPosRelativeToTarget, -angleToKnownAxis * RotationHelper.TO_DEGREES));
 					view.getViewportFramebufferRenderer().getCameraPosition().set(cameraPosRelativeToTarget.add(view.getViewportFramebufferRenderer().getCameraTarget()));

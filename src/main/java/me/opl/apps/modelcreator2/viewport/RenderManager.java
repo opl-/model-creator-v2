@@ -60,7 +60,7 @@ public class RenderManager implements GLEventListener {
 
 		return GLDrawableFactory.getFactory(p).createOffscreenAutoDrawable(null, caps, new DefaultGLCapabilitiesChooser(), 5, 5);
 	}
-	
+
 	public ResourceManager getResourceManager() {
 		return resourceManager;
 	}

@@ -50,7 +50,7 @@ public class ShaderProgramResource implements Resource {
 	}
 
 	/**
-	 * Used to retrieve uniform locations with cache. 
+	 * Used to retrieve uniform locations with cache.
 	 *
 	 * @param gl GL3 instance
 	 * @param uniformName Name of the uniform in this program

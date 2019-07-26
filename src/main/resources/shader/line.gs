@@ -26,7 +26,7 @@ void main() {
 		d = cameraPosition - gl_in[1].gl_Position.xyz;
 		n2 *= sqrt(dot(d, d)) / 100f;
 	}
-	
+
 	gColor = vColor[0];
 
 	gl_Position = modelMatrix * viewProjectionMatrix * (gl_in[0].gl_Position - n1);

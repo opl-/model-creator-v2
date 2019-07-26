@@ -303,7 +303,7 @@ public class ViewportFramebufferRenderer implements FramebufferRenderer {
 		public Position getDirection() {
 			return direction == null ? null : direction.clone();
 		}
-	
+
 		public boolean hasDirection() {
 			return direction != null;
 		}

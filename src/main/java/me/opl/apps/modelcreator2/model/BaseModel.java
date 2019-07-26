@@ -47,14 +47,14 @@ public class BaseModel implements EventListener {
 	/**
 	 * Get parent model.
 	 *
-	 * @return Parent model if it exists, null otherwise 
+	 * @return Parent model if it exists, null otherwise
 	 */
 	public BaseModel getParent() {
 		return parentModel;
 	}
 
 	/**
-	 * @return This model's event dispatcher 
+	 * @return This model's event dispatcher
 	 */
 	public EventDispatcher getEventDispatcher() {
 		return eventDispatcher;
@@ -196,7 +196,7 @@ public class BaseModel implements EventListener {
 	}
 
 	/**
-	 * Get a Texture with resource location from any Texture passed. 
+	 * Get a Texture with resource location from any Texture passed.
 	 *
 	 * @param texture Any Texture object or {@code null}
 	 * @return Texture with resource location or {@code null} if not found or passed

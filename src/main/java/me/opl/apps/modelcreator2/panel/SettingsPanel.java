@@ -39,7 +39,7 @@ public class SettingsPanel extends AbstractPanel {
 		categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		categoryList.setSelectedIndex(0);
 
-		JScrollPane settingsScrollPane = new JScrollPane(); 
+		JScrollPane settingsScrollPane = new JScrollPane();
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, categoryList, settingsScrollPane);
 		splitPane.setDividerSize(3);

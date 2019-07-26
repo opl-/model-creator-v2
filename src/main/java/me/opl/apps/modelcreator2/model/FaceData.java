@@ -88,7 +88,6 @@ public class FaceData {
 
 	/**
 	 * @param newUV New UV for this face or {@code null} to unset
-	 * 
 	 */
 	public void setUV(UV newUV) {
 		if (newUV == null) uv = null;

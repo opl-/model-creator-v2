@@ -12,7 +12,7 @@ package me.opl.apps.modelcreator2.history;
  * right after or before the action originally took place.
  * </li>
  * <li>The behavior must not change based on any state changes that might have
- * happened after the action originally happened and the method was invoked such 
+ * happened after the action originally happened and the method was invoked such
  * as application settings being changed.
  * </li>
  * <li>The behavior must not change if the method is called multiple times.
@@ -21,7 +21,7 @@ package me.opl.apps.modelcreator2.history;
  */
 public interface HistoryAction {
 	/**
-	 * Called to perform the undoing of the action this entry represents. 
+	 * Called to perform the undoing of the action this entry represents.
 	 *
 	 * @see HistoryAction
 	 */
