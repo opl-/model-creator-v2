@@ -161,17 +161,6 @@ public class ModelBuffer implements Resource {
 		return this;
 	}
 
-	public ModelBuffer setUV(float x, float y, int textureSize) {
-		int offset = SIZE_PER_VERTEX * currentVertex + OFFSET_UV;
-
-		putFloat(offset, x / (float) textureSize);
-		putFloat(offset + GLHelper.FLOAT_SIZE, 1 - (y / (float) textureSize));
-
-		dirty = true;
-
-		return this;
-	}
-
 	public ModelBuffer unsetColor() {
 		int offset = SIZE_PER_VERTEX * currentVertex;
 

@@ -1,6 +1,5 @@
 package me.opl.apps.modelcreator2.model;
 
-// TODO: add flipping textures
 public class FaceData {
 	private Fragment fragment;
 

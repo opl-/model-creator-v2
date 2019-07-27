@@ -64,7 +64,7 @@ public class CuboidRenderer implements Renderer {
 	private void renderFace(Face face) {
 		FaceData faceData = cuboid.getFaceData(face);
 
-		// FIXME: make this actually stop rendering
+		// Face is invisible, no need to update its data
 		if (!faceData.isVisible()) return;
 
 		Position[] corners = cuboid.getFaceCorners(face);
@@ -81,25 +81,26 @@ public class CuboidRenderer implements Renderer {
 
 		if (uv == null && texture != null) {
 			Position[] cornersNoRotation = cuboid.getFaceCornersNoRotation(face);
+			for (Position p : cornersNoRotation) p.multiply(1f / 16f);
 
 			switch (face) {
 			case NORTH:
-				uv = new UV(16 - cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getY(), 16 - cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getY());
+				uv = new UV(1 - cornersNoRotation[0].getX(), 1 - cornersNoRotation[0].getY(), 1 - cornersNoRotation[3].getX(), 1 - cornersNoRotation[3].getY());
 				break;
 			case EAST:
-				uv = new UV(16 - cornersNoRotation[0].getZ(), 16 - cornersNoRotation[0].getY(), 16 - cornersNoRotation[3].getZ(), 16 - cornersNoRotation[3].getY());
+				uv = new UV(1 - cornersNoRotation[0].getZ(), 1 - cornersNoRotation[0].getY(), 1 - cornersNoRotation[3].getZ(), 1 - cornersNoRotation[3].getY());
 				break;
 			case SOUTH:
-				uv = new UV(cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getY(), cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getY());
+				uv = new UV(cornersNoRotation[0].getX(), 1 - cornersNoRotation[0].getY(), cornersNoRotation[3].getX(), 1 - cornersNoRotation[3].getY());
 				break;
 			case WEST:
-				uv = new UV(cornersNoRotation[0].getZ(), 16 - cornersNoRotation[0].getY(), cornersNoRotation[3].getZ(), 16 - cornersNoRotation[3].getY());
+				uv = new UV(cornersNoRotation[0].getZ(), 1 - cornersNoRotation[0].getY(), cornersNoRotation[3].getZ(), 1 - cornersNoRotation[3].getY());
 				break;
 			case UP:
 				uv = new UV(cornersNoRotation[0].getX(), cornersNoRotation[0].getZ(), cornersNoRotation[3].getX(), cornersNoRotation[3].getZ());
 				break;
 			case DOWN:
-				uv = new UV(cornersNoRotation[0].getX(), 16 - cornersNoRotation[0].getZ(), cornersNoRotation[3].getX(), 16 - cornersNoRotation[3].getZ());
+				uv = new UV(cornersNoRotation[0].getX(), 1 - cornersNoRotation[0].getZ(), cornersNoRotation[3].getX(), 1 - cornersNoRotation[3].getZ());
 				break;
 			}
 		}
@@ -119,7 +120,7 @@ public class CuboidRenderer implements Renderer {
 
 		if (texture != null) {
 			modelBuffer.setTexture(texture);
-			modelBuffer.setUV(uv.getX1(), uv.getY1(), 16);
+			modelBuffer.setUV(uv.getX1(), uv.getY1());
 			modelBuffer.unsetColor();
 		} else {
 			modelBuffer.setColor(r, g, b);
@@ -130,7 +131,7 @@ public class CuboidRenderer implements Renderer {
 
 		if (texture != null) {
 			modelBuffer.setTexture(texture);
-			modelBuffer.setUV(uv.getX1(), uv.getY2(), 16);
+			modelBuffer.setUV(uv.getX1(), uv.getY2());
 			modelBuffer.unsetColor();
 		} else {
 			modelBuffer.setColor(r, g, b);
@@ -141,7 +142,7 @@ public class CuboidRenderer implements Renderer {
 
 		if (texture != null) {
 			modelBuffer.setTexture(texture);
-			modelBuffer.setUV(uv.getX2(), uv.getY1(), 16);
+			modelBuffer.setUV(uv.getX2(), uv.getY1());
 			modelBuffer.unsetColor();
 		} else {
 			modelBuffer.setColor(r, g, b);
@@ -152,7 +153,7 @@ public class CuboidRenderer implements Renderer {
 
 		if (texture != null) {
 			modelBuffer.setTexture(texture);
-			modelBuffer.setUV(uv.getX2(), uv.getY2(), 16);
+			modelBuffer.setUV(uv.getX2(), uv.getY2());
 			modelBuffer.unsetColor();
 		} else {
 			modelBuffer.setColor(r, g, b);

@@ -2,6 +2,10 @@ package me.opl.apps.modelcreator2.model;
 
 import me.opl.apps.modelcreator2.util.MathHelper;
 
+/**
+ * This class is responsible for storing UVs for rectangular faces. The
+ * coordinates stored by this class are normalized into the [0..1] range.
+ */
 public class UV {
 	private float x1;
 	private float y1;
@@ -9,7 +13,7 @@ public class UV {
 	private float y2;
 
 	public UV() {
-		this(0f, 0f, 16f, 16f);
+		this(0f, 0f, 1f, 1f);
 	}
 
 	public UV(float x1, float y1, float x2, float y2) {
@@ -63,6 +67,30 @@ public class UV {
 		y1 = uv.y1;
 		x2 = uv.x2;
 		y2 = uv.y2;
+	}
+
+	public boolean isFlippedHorizontally() {
+		return this.x2 < this.x1;
+	}
+
+	public void setFlippedHorizontally(boolean flipH) {
+		if (isFlippedHorizontally() ^ flipH) {
+			float temp = x1;
+			x1 = x2;
+			x2 = temp;
+		}
+	}
+
+	public boolean isFlippedVertically() {
+		return this.y2 < this.y1;
+	}
+
+	public void setFlippedVertically(boolean flipV) {
+		if (isFlippedVertically() ^ flipV) {
+			float temp = y1;
+			y1 = y2;
+			y2 = temp;
+		}
 	}
 
 	/**

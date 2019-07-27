@@ -115,7 +115,6 @@ public class MinecraftModelImporter implements Importer {
 					JSONArray uvArray = face.optJSONArray("uv");
 
 					if (uvArray != null) {
-						// TODO: detect texture flipping (inside of the UV class?)
 						faceData.setUV(arrayToUV(uvArray));
 					}
 				} else {
@@ -142,6 +141,6 @@ public class MinecraftModelImporter implements Importer {
 		float[] uv = new float[4];
 		for (int i = 0; i < 4; i++) uv[i] = (float) array.getDouble(i);
 
-		return new UV(uv[0], uv[1], uv[2], uv[3]);
+		return new UV(uv[0] / 16, uv[1] / 16, uv[2] / 16, uv[3] / 16);
 	}
 }
