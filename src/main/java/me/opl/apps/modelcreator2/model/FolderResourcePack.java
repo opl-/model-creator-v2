@@ -24,10 +24,9 @@ public class FolderResourcePack implements ResourcePack {
 	}
 
 	@Override
-	public InputStream getResource(ResourceLocation location) {
+	public InputStream getResourceStream(String resourcePath) {
 		try {
-			// FIXME: this shouldnt be loading from textures
-			return new FileInputStream(new File(packDirectory, "assets/" + location.getDomain() + "/textures/" + location.getPath() + ".png"));
+			return new FileInputStream(new File(packDirectory, resourcePath));
 		} catch (FileNotFoundException e) {
 			return null;
 		}

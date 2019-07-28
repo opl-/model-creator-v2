@@ -16,7 +16,6 @@ import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Rotation;
-import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.model.UV;
 
 // TODO: differentiate between block and item models. somehow
@@ -58,9 +57,10 @@ public class MinecraftModelImporter implements Importer {
 			String location = texturesObject.getString(name);
 
 			if (location.charAt(0) == '#') {
-				model.addTexture(new Texture(name, location.substring(1)));
+				model.addTexture(name, new ResourceLocation(location));
 			} else {
-				model.addTexture(new Texture(name, new ResourceLocation(location)));
+				ResourceLocation resLoc = new ResourceLocation(location);
+				model.addTexture(name, new ResourceLocation(resLoc.getDomain(), resLoc.getPath()));
 			}
 		}
 	}
@@ -104,12 +104,7 @@ public class MinecraftModelImporter implements Importer {
 
 					if (textureReference.charAt(0) != '#') continue;
 
-					textureReference = textureReference.substring(1);
-
-					Texture texture = model.getModelTextureByName(textureReference);
-					if (texture == null) texture = new Texture(null, textureReference);
-
-					faceData.setTexture(texture);
+					faceData.setTexture(new ResourceLocation(textureReference));
 
 					// UV
 					JSONArray uvArray = face.optJSONArray("uv");

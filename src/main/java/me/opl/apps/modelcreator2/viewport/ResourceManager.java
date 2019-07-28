@@ -13,8 +13,8 @@ import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.ResourcePack;
 import me.opl.apps.modelcreator2.model.ZipResourcePack;
 import me.opl.apps.modelcreator2.viewport.resource.FramebufferResource;
-import me.opl.apps.modelcreator2.viewport.resource.MissingTextureResource;
 import me.opl.apps.modelcreator2.viewport.resource.FramebufferResource.FramebufferRenderer;
+import me.opl.apps.modelcreator2.viewport.resource.MissingTextureResource;
 import me.opl.apps.modelcreator2.viewport.resource.Resource;
 import me.opl.apps.modelcreator2.viewport.resource.ShaderProgramResource;
 import me.opl.apps.modelcreator2.viewport.resource.SimpleTextureResource;
@@ -88,9 +88,9 @@ public class ResourceManager {
 		destroyList.clear();
 	}
 
-	public InputStream getResourceInputStream(ResourceLocation location) {
+	public InputStream getResourceInputStream(String resourcePath) {
 		for (ResourcePack rp : resourcePacks) {
-			InputStream is = rp.getResource(location);
+			InputStream is = rp.getResourceStream(resourcePath);
 
 			if (is != null) return is;
 		}

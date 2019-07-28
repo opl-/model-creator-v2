@@ -1,6 +1,7 @@
 package me.opl.apps.modelcreator2.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import me.opl.apps.modelcreator2.ModelCreator;
@@ -21,7 +22,7 @@ public class MinecraftModel implements EventListener {
 
 	private ElementGroup rootGroup = new ElementGroup();
 	private ArrayList<Element> elements;
-	private ArrayList<Texture> textures = new ArrayList<>();
+	private HashMap<String, ResourceLocation> textures = new HashMap<>();
 
 	private boolean ambientOcclusion = true;
 
@@ -170,82 +171,86 @@ public class MinecraftModel implements EventListener {
 	}
 
 	/**
-	 * Get texture by name in this or parent models.
+	 * Get resource location for texture name in this or parent models.
 	 *
 	 * @param textureName The name of the desired texture
-	 * @return Texture with the given name
+	 * @return Resource location for the given texture name
 	 */
-	public Texture getTextureByName(String textureName) {
-		Texture texture = getModelTextureByName(textureName);
+	public ResourceLocation getResourceLocationByTextureName(String textureName) {
+		ResourceLocation resourceLocation = getModelResourceLocationByTextureName(textureName);
 
-		if (texture == null && getParent() != null) texture = getParent().getTextureByName(textureName);
+		if (resourceLocation == null && getParent() != null) resourceLocation = getParent().getResourceLocationByTextureName(textureName);
 
-		return texture;
+		return resourceLocation;
 	}
 
 	/**
-	 * Get texture by name in this model.
+	 * Get resource location for texture name in this model.
 	 *
 	 * @param textureName The name of the desired texture
-	 * @return Texture with the given name
+	 * @return Resource location for the given texture name
 	 */
-	public Texture getModelTextureByName(String textureName) {
-		for (Texture t : textures) if (t.getName().equals(textureName)) return t;
-
-		return null;
+	public ResourceLocation getModelResourceLocationByTextureName(String textureName) {
+		return textures.get(textureName);
 	}
 
 	/**
-	 * Get a Texture with resource location from any Texture passed.
+	 * Get resource location for the given resource location object containing a
+	 * reference.
 	 *
-	 * @param texture Any Texture object or {@code null}
-	 * @return Texture with resource location or {@code null} if not found or passed
-	 * texture is {@code null}
-	 */
-	public Texture resolveTexture(Texture texture) {
-		if (texture == null) return null;
-
-		if (!texture.isReference()) return texture;
-
-		return resolveTexture(getTextureByName(texture.getTextureReference()));
-	}
-
-	/**
-	 * Get textures in this model. The returned array is a copy of the texture
-	 * list.
+	 * A resource location is a reference when its domain is
+	 * "minecraft" and its path starts with "#". This is a little hack to allow
+	 * reference chaining.
 	 *
-	 * @return Copy of the list of textures in this model
+	 * @param textureReference A reference resource location object
+	 * @return Resource location for the reference, {@code null} otherwise
 	 */
-	public Texture[] getModelTextures() {
-		Texture[] texturesArray = new Texture[textures.size()];
-		textures.toArray(texturesArray);
-		return texturesArray;
+	public ResourceLocation resolveTexture(ResourceLocation textureReference) {
+		if (textureReference == null) return null;
+
+		// FIXME: Are domains case sensitive?
+		if (textureReference.getPath().charAt(0) != '#' || !textureReference.getDomain().equals("minecraft")) return textureReference;
+
+		return resolveTexture(getResourceLocationByTextureName(textureReference.getPath().substring(1)));
 	}
 
 	/**
-	 * @param texture {@link Texture} instance to add to this model's texture
-	 * list
-	 * @return {@code true} if the texture doesn't already exist and was added,
-	 * {@code false} otherwise
-	 * @throws IllegalArgumentException if {@code texture} is null or doesn't
-	 * have a name
+	 * Get texture names in this model.
+	 *
+	 * @return Array of texture names in this model
 	 */
-	public boolean addTexture(Texture texture) {
-		if (texture == null) throw new IllegalArgumentException("Texture is null");
-		if (texture.getName() == null) throw new IllegalArgumentException("Texture has no name");
-		if (textures.contains(texture)) return false;
-
-		return textures.add(texture);
+	public String[] getModelTextureNames() {
+		String[] textureNames = new String[textures.size()];
+		textures.keySet().toArray(textureNames);
+		return textureNames;
 	}
 
 	/**
-	 * @param texture {@link Texture} instance to remove from this model's
-	 * texture list
-	 * @return {@code true} if the texture existed and was removed,
+	 * @param textureName Name for this texture mapping
+	 * @param resourceLocation Resource location or a reference resource
+	 * location
+	 * @return {@code true} if the name isn't already used and was added,
+	 * {@code false} otherwise
+	 * @throws IllegalArgumentException if {@code name} or
+	 * {@code resourceLocation} is null
+	 * @see MinecraftModel#resolveTexture(ResourceLocation)
+	 */
+	public boolean addTexture(String textureName, ResourceLocation resourceLocation) {
+		if (textureName == null) throw new IllegalArgumentException("name is null");
+		if (resourceLocation == null) throw new IllegalArgumentException("resourceLocation is null");
+		if (textures.containsKey(textureName)) return false;
+
+		textures.put(textureName, resourceLocation);
+		return true;
+	}
+
+	/**
+	 * @param textureName Name of the texture mapping to remove
+	 * @return {@code true} if the texture mapping existed and was removed,
 	 * {@code false} otherwise
 	 */
-	public boolean removeTexture(Texture texture) {
-		return textures.remove(texture);
+	public boolean removeTexture(String textureName) {
+		return textures.remove(textureName) != null;
 	}
 
 	/**

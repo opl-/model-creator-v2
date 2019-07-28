@@ -30,7 +30,8 @@ public class AnimatedTextureResource implements TextureResource {
 	@Override
 	public void prepare(GL3 gl) {
 		try {
-			textureData = TextureIO.newTextureData(gl.getGLProfile(), resourceManager.getResourceInputStream(location), false, "png");
+			// TODO: resource path generation should be handled elsewhere
+			textureData = TextureIO.newTextureData(gl.getGLProfile(), resourceManager.getResourceInputStream("assets/" + location.getDomain() + "/textures/" + location.getPath() + ".png"), false, "png");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

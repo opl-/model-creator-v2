@@ -33,10 +33,9 @@ public class ZipResourcePack implements ResourcePack {
 	}
 
 	@Override
-	public InputStream getResource(ResourceLocation location) {
+	public InputStream getResourceStream(String resourcePath) {
 		try {
-			// FIXME: this shouldnt be loading from textures
-			ZipEntry entry = zipFile.getEntry("assets/" + location.getDomain() + "/textures/" + location.getPath() + ".png");
+			ZipEntry entry = zipFile.getEntry(resourcePath);
 
 			if (entry == null) return null;
 

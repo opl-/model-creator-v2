@@ -8,13 +8,14 @@ import me.opl.apps.modelcreator2.model.FaceData;
 import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
-import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.model.UV;
 import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.resource.ModelBuffer;
+import me.opl.apps.modelcreator2.viewport.resource.TextureResource;
 
 public class CuboidRenderer implements Renderer {
+	private RenderManager renderManager;
 	private MinecraftModel model;
 	private Cuboid cuboid;
 	private long lastUpdate = -1;
@@ -22,6 +23,7 @@ public class CuboidRenderer implements Renderer {
 	private ModelBuffer modelBuffer;
 
 	public CuboidRenderer(RenderManager renderManager, MinecraftModel model, Cuboid cuboid) {
+		this.renderManager = renderManager;
 		this.model = model;
 		this.cuboid = cuboid;
 
@@ -69,12 +71,14 @@ public class CuboidRenderer implements Renderer {
 
 		Position[] corners = cuboid.getFaceCorners(face);
 
-		Texture texture = null;
+		TextureResource texture = null;
 
 		if (faceData.getTexture() != null) {
-			texture = model.resolveTexture(faceData.getTexture());
+			ResourceLocation textureLocation = model.resolveTexture(faceData.getTexture());
 
-			if (texture == null) texture = new Texture("missingno", new ResourceLocation("missingno"));
+			if (textureLocation == null) textureLocation = new ResourceLocation("missingno");
+
+			texture = renderManager.getResourceManager().getTextureOrMissing(textureLocation);
 		}
 
 		UV uv = faceData.getUV();

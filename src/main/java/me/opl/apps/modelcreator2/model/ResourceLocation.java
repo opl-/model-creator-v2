@@ -1,5 +1,7 @@
 package me.opl.apps.modelcreator2.model;
 
+import java.util.Objects;
+
 public class ResourceLocation {
 	private String domain;
 	private String path;
@@ -12,6 +14,9 @@ public class ResourceLocation {
 	}
 
 	public ResourceLocation(String domain, String path) {
+		if (domain == null) throw new IllegalArgumentException("domain is null");
+		if (path == null) throw new IllegalArgumentException("path is null");
+
 		this.domain = domain;
 		this.path = path;
 	}
@@ -31,7 +36,7 @@ public class ResourceLocation {
 
 	@Override
 	public int hashCode() {
-		return 31 * domain.hashCode() + path.hashCode();
+		return Objects.hash(domain, path);
 	}
 
 	@Override

@@ -24,7 +24,6 @@ import me.opl.apps.modelcreator2.model.MinecraftModel;
 import me.opl.apps.modelcreator2.model.Position;
 import me.opl.apps.modelcreator2.model.ResourceLocation;
 import me.opl.apps.modelcreator2.model.Rotation;
-import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.tool.ToolManager;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 import me.opl.apps.modelcreator2.viewport.ViewportContextInitializer;
@@ -94,21 +93,21 @@ public class ModelCreator implements EventListener {
 		element.setCorners(new Position(0, 0, 0), new Position(5, 5, 5));
 		element.setRotation(new Rotation().setd(0, 45, 0));
 		for (Face f : Face.values()) {
-			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
+			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new ResourceLocation("#" + f.name().toLowerCase()));
 		}
 		cubeModel.addElement(element);
 		element = new CuboidElement(cubeModel);
 		element.setCorners(new Position(10, 10, 7), new Position(15, 15, 12));
 		for (Face f : Face.values()) {
-			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new Texture(null, f.name().toLowerCase()));
+			((Cuboid) element.getFragments()[0]).getFaceData(f).setTexture(new ResourceLocation("#" + f.name().toLowerCase()));
 		}
 		cubeModel.addElement(element);
 
 		// cube_all.json
 		MinecraftModel cubeAllModel = new MinecraftModel(instance, cubeModel, "cube_all");
-		cubeAllModel.addTexture(new Texture("particle", "all"));
+		cubeAllModel.addTexture("particle", new ResourceLocation("#all"));
 		for (Face f : Face.values()) {
-			cubeAllModel.addTexture(new Texture(f.name().toLowerCase(), "all"));
+			cubeAllModel.addTexture(f.name().toLowerCase(), new ResourceLocation("#all"));
 		}
 
 		// coal_block.json
@@ -117,10 +116,8 @@ public class ModelCreator implements EventListener {
 		ResourceLocation resourceLocation = new ResourceLocation("minecraft:block/comparator_on");
 		// TODO: do this load call elsewhere
 		instance.getRenderManager().getResourceManager().loadTexture(resourceLocation);
-		Texture tex1 = new Texture("all", resourceLocation);
-		model.addTexture(tex1);
-		/*Texture tex2 = new Texture("west", new ResourceLocation("minecraft:blocks/missingtex"));
-		model.addTexture(tex2);*/
+		model.addTexture("all", resourceLocation);
+		// model.addTexture("west", new ResourceLocation("minecraft:blocks/missingtex"));
 
 		instance.addModel(model);
 

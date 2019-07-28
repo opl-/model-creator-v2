@@ -1,6 +1,5 @@
 package me.opl.apps.modelcreator2.importer;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +27,9 @@ public class ImporterManager {
 
 	// FIXME: what about blockstates?
 	// TODO: should opening stand-alone files be possible too?
+	// FIXME: this just doesn't work as is. figure out a proper way of opening files
 	public void openFiles(ResourceLocation resourceLocation) {
-		for (Importer importer : importers) {
+		/*for (Importer importer : importers) {
 			try {
 				InputStream inputStream = modelCreator.getRenderManager().getResourceManager().getResourceInputStream(resourceLocation);
 
@@ -39,6 +39,6 @@ public class ImporterManager {
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Exception thrown opening resource " + resourceLocation + " with " + importer.getClass().getSimpleName(), e);
 			}
-		}
+		}*/
 	}
 }

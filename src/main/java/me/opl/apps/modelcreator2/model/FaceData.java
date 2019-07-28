@@ -7,7 +7,7 @@ public class FaceData {
 
 	// TODO: setting to simulate solid blocks around
 	private Face cullFace;
-	private Texture texture;
+	private ResourceLocation texture;
 	private UV uv;
 	private int textureRotation;
 	private int tintIndex = -1;
@@ -30,7 +30,7 @@ public class FaceData {
 	 * @param uv UV of this face or {@code null} for automatic
 	 * @param texture Texture of this face or {@code null} if none
 	 */
-	public FaceData(Fragment fragment, Face cullFace, UV uv, Texture texture) {
+	public FaceData(Fragment fragment, Face cullFace, UV uv, ResourceLocation texture) {
 		this.fragment = fragment;
 		this.cullFace = cullFace;
 		this.uv = uv;
@@ -52,14 +52,14 @@ public class FaceData {
 	/**
 	 * @return This face's texture or {@code null} if none
 	 */
-	public Texture getTexture() {
+	public ResourceLocation getTexture() {
 		return texture;
 	}
 
 	/**
 	 * @param texture New texture for this face or {@code null} for none
 	 */
-	public void setTexture(Texture texture) {
+	public void setTexture(ResourceLocation texture) {
 		this.texture = texture;
 	}
 

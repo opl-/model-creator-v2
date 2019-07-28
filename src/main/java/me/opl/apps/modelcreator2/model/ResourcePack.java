@@ -7,5 +7,5 @@ public interface ResourcePack {
 
 	public String getName();
 
-	public InputStream getResource(ResourceLocation location);
+	public InputStream getResourceStream(String resourcePath);
 }

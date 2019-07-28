@@ -6,7 +6,6 @@ import java.nio.ByteOrder;
 import com.jogamp.opengl.GL3;
 
 import me.opl.apps.modelcreator2.model.Position;
-import me.opl.apps.modelcreator2.model.Texture;
 import me.opl.apps.modelcreator2.util.GLHelper;
 import me.opl.apps.modelcreator2.viewport.RenderManager;
 
@@ -39,7 +38,7 @@ public class ModelBuffer implements Resource {
 
 	private int currentVertex = -1;
 
-	private Texture[] textures = new Texture[16];
+	private TextureResource[] textures = new TextureResource[16];
 	private int currentTexture = 0;
 
 	private int vao = -1;
@@ -113,18 +112,18 @@ public class ModelBuffer implements Resource {
 		return this;
 	}
 
-	public ModelBuffer setTexture(Texture texture) {
+	public ModelBuffer setTexture(TextureResource textureResource) {
 		int offset = SIZE_PER_VERTEX * currentVertex + OFFSET_TEXTURE;
 
 		int texturePosition = -1;
 
-		for (int i = 0; i < textures.length; i++) if (textures[i] == texture) {
+		for (int i = 0; i < textures.length; i++) if (textures[i] == textureResource) {
 			texturePosition = i;
 			break;
 		}
 
 		if (texturePosition == -1) {
-			textures[currentTexture] = texture;
+			textures[currentTexture] = textureResource;
 
 			texturePosition = currentTexture;
 
@@ -266,7 +265,7 @@ public class ModelBuffer implements Resource {
 
 		for (int i = 0; i < currentTexture; i++) {
 			gl.glActiveTexture(GL3.GL_TEXTURE0 + i);
-			renderManager.getResourceManager().getTextureOrMissing(textures[i].getResourceLocation()).bind(gl);
+			textures[i].bind(gl);
 		}
 	}
 
