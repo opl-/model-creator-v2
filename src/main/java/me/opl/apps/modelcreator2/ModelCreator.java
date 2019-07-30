@@ -59,7 +59,7 @@ public class ModelCreator implements EventListener {
 	public ModelCreator() {
 		getGlobalEventDispatcher().registerListeners(this);
 
-		renderManager.getPlaybackState().getEventDispatcher().setParentDipatcher(globalEventDispatcher);
+		renderManager.getPlaybackState().getEventDispatcher().setParentDispatcher(globalEventDispatcher);
 
 		importerManager = new ImporterManager(this);
 		exporterManager = new ExporterManager(this);

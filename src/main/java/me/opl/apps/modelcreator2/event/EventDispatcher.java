@@ -137,7 +137,7 @@ public class EventDispatcher {
 	 * @param parentDispatcher The new {@link EventDispatcher}
 	 * @see EventDispatcher#getParentDispatcher()
 	 */
-	public void setParentDipatcher(EventDispatcher parentDispatcher) {
+	public void setParentDispatcher(EventDispatcher parentDispatcher) {
 		this.parentDispatcher = parentDispatcher;
 	}
 
