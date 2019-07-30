@@ -2,7 +2,7 @@ package me.opl.apps.modelcreator2.event;
 
 import me.opl.apps.modelcreator2.model.PlaybackState;
 
-public class PlaybackStateChangeEvent extends Event implements EventCancellable {
+public class PlaybackStateChangeEvent implements EventCancellable {
 	private boolean cancelled = false;
 
 	private ChangeType changeType;

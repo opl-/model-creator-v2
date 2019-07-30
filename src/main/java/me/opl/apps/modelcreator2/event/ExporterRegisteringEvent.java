@@ -2,7 +2,7 @@ package me.opl.apps.modelcreator2.event;
 
 import me.opl.apps.modelcreator2.exporter.Exporter;
 
-public class ExporterRegisteringEvent extends Event implements EventCancellable {
+public class ExporterRegisteringEvent implements EventCancellable {
 	private boolean cancelled = false;
 	private Exporter exporter;
 

@@ -101,6 +101,18 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * Fires given event and returns its cancelled state.
+	 *
+	 * @param eventCancellable Event to fire
+	 * @return {@code true} if event was cancelled, {@code false} otherwise
+	 */
+	public boolean fireIsCancelled(EventCancellable eventCancellable) {
+		fire(eventCancellable);
+
+		return eventCancellable.isCancelled();
+	}
+
+	/**
 	 * Event dispatchers can be corked to stop them from delivering events to
 	 * registered event listeners. This allows reducing load by firing a single
 	 * bulk event after an operation modifying many elements instead of firing

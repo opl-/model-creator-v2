@@ -3,7 +3,7 @@ package me.opl.apps.modelcreator2.event.model;
 import me.opl.apps.modelcreator2.event.Event;
 import me.opl.apps.modelcreator2.model.MinecraftModel;
 
-public class ModelEvent extends Event {
+public class ModelEvent implements Event {
 	private MinecraftModel model;
 
 	public ModelEvent(MinecraftModel model) {
